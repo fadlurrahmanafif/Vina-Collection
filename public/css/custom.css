@@ -1,20 +1,51 @@
-      .icon-nav {
-          color: #FFFFFF8C;
-      }
+/* Reset dan Base Layout */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-      .icon-nav:hover {
-          color: rgb(255, 255, 255);
-      }
+html, body {
+    height: 100%;
+}
 
-      .circle {
-          position: fixed;
-          width: 20px;
-          height: 20px;
-          border-radius: 50%;
-          background-color: rgba(255, 49, 49, 0.904);
-          color: white;
-          text-align: center;
-          font-size: 12px;
-          top: 13px;
-          right: 305px;
-      }
+/* Body sebagai Flexbox Container */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 60vh;
+}
+
+/* Navigation Icons */
+.icon-nav {
+    color: #FFFFFF8C;
+}
+
+.icon-nav:hover {
+    color: rgb(255, 255, 255);
+}
+
+/* Notification Circle */
+.circle {
+    position: fixed;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: rgba(255, 49, 49, 0.904);
+    color: white;
+    text-align: center;
+    font-size: 12px;
+    top: 13px;
+    right: 305px;
+}
+
+
+
+
+/* Footer - Selalu di bawah */
+footer {
+    flex-shrink: 0;
+    background-color: #00D4E7;
+    color: white;
+    margin-top: auto; /* Pastikan footer terdorong ke bawah */
+}

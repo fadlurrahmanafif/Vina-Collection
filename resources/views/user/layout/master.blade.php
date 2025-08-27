@@ -21,8 +21,9 @@
 
 <body>
     @include('user.components.navbar')
-
+<main>
     @yield('content')
+</main>
 
     @include('user.components.footer')
 
