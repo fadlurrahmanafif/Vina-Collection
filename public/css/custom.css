@@ -5,7 +5,8 @@
     box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
     height: 100%;
 }
 
@@ -24,29 +25,48 @@ body {
 .icon-nav:hover {
     color: rgb(255, 255, 255);
 }
-.filter{
+
+.icon-nav.active {
+    color: #fff !important;
+}
+
+.nav-link.active {
+    color: #fff !important;
+    font-weight: bold;
+    border-bottom: 2px solid white;
+}
+
+.filter {
     color: black;
 }
 
 .filter:hover {
     color: #00D4E7;
 }
- 
-.btn-search:hover{
-background-color: #00D4E7;
+
+.btn-search:hover {
+    background-color: #00D4E7;
 }
+
 /* Notification Circle */
+.notif {
+    position: relative;
+    display: inline-block;
+}
+
 .circle {
     position: absolute;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background-color: rgba(255, 49, 49, 0.904);
-    color: white;
-    text-align: center;
+    top: -5px;
+    right: -10px;
+    width: 18px;
+    height: 18px;
     font-size: 12px;
-    top: 13px;
-    right: 298px;
+    border-radius: 50%;
+    background-color: rgba(255, 49, 49, 0.9);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 
@@ -57,5 +77,6 @@ footer {
     flex-shrink: 0;
     background-color: #00D4E7;
     color: white;
-    margin-top: auto; /* Pastikan footer terdorong ke bawah */
+    margin-top: auto;
+    /* Pastikan footer terdorong ke bawah */
 }
