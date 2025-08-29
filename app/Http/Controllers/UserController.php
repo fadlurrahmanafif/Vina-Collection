@@ -6,7 +6,7 @@ use App\Models\Cart;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
-class ProductController extends Controller
+class UserController extends Controller
 {
     public function index()
     {
@@ -17,5 +17,19 @@ class ProductController extends Controller
             'data' =>  $product,
         ]);
         
+    }
+
+    public function cart()
+    {
+        return view('user.page.cart',[
+            'title' => 'Keranjang'
+        ]);
+    }
+
+    public function statusPesanan()
+    {
+        return view('user.page.status',[
+            'title' => 'Status Pesanan'
+        ]);
     }
 }

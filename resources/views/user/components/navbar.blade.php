@@ -16,15 +16,29 @@
                       </a>
                   </li>
                   <li class="nav-item">
-                      <a class="nav-link fs-5 {{ Request::path() == 'shop' ? 'active' : '' }}" aria-current="page"
-                          href="/status">
+                      <a class="nav-link fs-5 {{ Request::path() == 'statuspesanan' ? 'active' : '' }}"
+                          aria-current="page" href="/statuspesanan">
                           Staus Pesanan
                       </a>
                   </li>
                   <div class="d-flex gap-4 align-items-center">
-                      <button type="submit" class="btn btn-outline-light">Login | Register</button>
+                      {{-- Kalau belum login --}}
+                      @guest
+                          <a href="{{ route('login') }}">
+                              <button type="button" class="btn btn-outline-light">Login | Register</button>
+                          </a>
+                      @endguest
+
+                      {{-- Kalau sudah login --}}
+                      @auth
+                          <form method="POST" action="{{ route('logout') }}">
+                              @csrf
+                              <button type="submit" class="btn btn-outline-light">Logout</button>
+                          </form>
+                      @endauth
+
                       <div class="notif">
-                          <a href="#" class="fs-4">
+                          <a href="/cart" class="fs-4">
                               <i class="fa-solid icon-nav fa-bag-shopping "></i>
                           </a>
                           <div class="circle">10</div>

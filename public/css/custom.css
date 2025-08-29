@@ -24,10 +24,20 @@ body {
 .icon-nav:hover {
     color: rgb(255, 255, 255);
 }
+.filter{
+    color: black;
+}
 
+.filter:hover {
+    color: #00D4E7;
+}
+ 
+.btn-search:hover{
+background-color: #00D4E7;
+}
 /* Notification Circle */
 .circle {
-    position: fixed;
+    position: absolute;
     width: 20px;
     height: 20px;
     border-radius: 50%;
@@ -36,7 +46,7 @@ body {
     text-align: center;
     font-size: 12px;
     top: 13px;
-    right: 305px;
+    right: 298px;
 }
 
 
