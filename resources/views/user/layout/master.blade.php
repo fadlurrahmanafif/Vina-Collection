@@ -15,23 +15,26 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css"
         integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href={{ asset('css/custom.css') }}>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href={{ asset('css/footer-navbar.css') }}>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+        integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <title>Vina Collection | {{ $title }}</title>
 </head>
 
 <body>
-   @if (Request::routeIs('home','keranjang','status.pesanan'))
-    @include('user.components.navbar')
-@endif
+    @if (Request::routeIs('home', 'keranjang', 'status.pesanan','checkout'))
+        @include('user.components.navbar')
+    @endif
 
-<div class="container">
-    @yield('content')
-</div>
+    <div class="container">
+        @yield('content')
+    </div>
 
-@if (Request::routeIs('home'))
-    @include('user.components.footer')
-@endif
+    @if (Request::routeIs('home'))
+        @include('user.components.footer')
+    @endif
 
 
 
@@ -42,6 +45,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"
         integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous">
     </script>
+    <script src="{{ asset('js/custom.js') }}"></script>
 </body>
 
 </html>

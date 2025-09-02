@@ -1,0 +1,295 @@
+/* CSS yang sudah ada */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Button hover yang lebih spesifik untuk override Bootstrap */
+.btn-outline-dark:hover {
+    background-color: #00D4E7 !important;
+    border-color: #00D4E7 !important;
+    color: white !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 212, 231, 0.3);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Large screens (Desktop) - 992px and up */
+@media (min-width: 992px) {
+    .checkout-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 15px;
+    }
+}
+
+/* Medium screens (Tablet) - 768px to 991px */
+@media (max-width: 991.98px) {
+    .row.mt-5 {
+        margin-top: 2rem !important;
+    }
+    
+    /* Stack form and payment summary vertically */
+    .col-sm-8, .col-sm-4 {
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Adjust form layout */
+    .row.mb-3 {
+        margin-bottom: 1rem !important;
+    }
+    
+    .col-sm-3, .col-sm-9 {
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Payment summary adjustments */
+    .col-sm-5, .col-sm-7 {
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Product card adjustments */
+    .card-body.d-flex {
+        flex-direction: column !important;
+        gap: 1rem !important;
+    }
+    
+    .card-img-top {
+        width: 50% !important;
+        height: auto !important;
+        align-self: center;
+    }
+    
+    .desc {
+        text-align: center;
+    }
+    
+    .desc p {
+        font-size: 20px !important;
+    }
+    
+    #harga {
+        font-size: 1.5rem !important;
+    }
+}
+
+/* Small screens (Mobile) - 576px to 767px */
+@media (max-width: 767.98px) {
+    .container-fluid {
+        padding: 0 10px;
+    }
+    
+    .row.mt-5 {
+        margin-top: 1rem !important;
+    }
+    
+    /* Form layout for mobile */
+    .row.mb-3 .col-sm-3,
+    .row.mb-3 .col-sm-9 {
+        flex: 0 0 100%;
+        max-width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .col-form-label {
+        padding-left: 0;
+        margin-bottom: 0.25rem;
+        font-weight: 500;
+    }
+    
+    /* Payment summary for mobile */
+    .row.mb-3 .col-sm-5,
+    .row.mb-3 .col-sm-7 {
+        flex: 0 0 100%;
+        max-width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .card-header h5 {
+        font-size: 1.1rem;
+    }
+    
+    /* Product card for mobile */
+    .card.mb-3.mt-5 {
+        margin-top: 2rem !important;
+    }
+    
+    .card-body.d-flex {
+        flex-direction: column !important;
+        gap: 1rem !important;
+        padding: 1rem;
+    }
+    
+    .card-img-top {
+        width: 70% !important;
+        height: auto !important;
+        align-self: center;
+    }
+    
+    .desc p {
+        font-size: 18px !important;
+        margin-bottom: 0.5rem;
+    }
+    
+    #harga {
+        font-size: 1.25rem !important;
+        text-align: center;
+    }
+    
+    /* Quantity section for mobile */
+    .row.mb-3.mt-3.align-items-center .col-sm-2,
+    .row.mb-3.mt-3.align-items-center .d-flex.col-sm-5 {
+        flex: 0 0 100%;
+        max-width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .d-flex.col-sm-5 {
+        justify-content: center;
+    }
+    
+    .form-control.w-25 {
+        width: 80px !important;
+        margin: 0 auto;
+    }
+    
+    /* Total section for mobile */
+    .row.align-items-center .col-sm-2,
+    .row.align-items-center .col-sm-5 {
+        flex: 0 0 100%;
+        max-width: 100%;
+        margin-bottom: 0.5rem;
+        text-align: center;
+    }
+    
+    .form-control.w-25.border-0.fs-5 {
+        width: 100% !important;
+        text-align: center;
+        font-size: 1.1rem !important;
+    }
+}
+
+/* Extra small screens (Small mobile) - below 576px */
+@media (max-width: 575.98px) {
+    .container-fluid {
+        padding: 0 8px;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+        border-radius: 8px;
+    }
+    
+    .card-body {
+        padding: 1rem 0.75rem;
+    }
+    
+    h3 {
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+    }
+    
+    .card-header h5 {
+        font-size: 1rem;
+    }
+    
+    /* Form elements */
+    .form-control {
+        font-size: 14px;
+        padding: 0.5rem;
+    }
+    
+    .col-form-label {
+        font-size: 14px;
+        font-weight: 500;
+    }
+    
+    /* Button */
+    .btn {
+        padding: 0.75rem 1rem;
+        font-size: 14px;
+    }
+    
+    /* Product card */
+    .card-img-top {
+        width: 80% !important;
+    }
+    
+    .desc p {
+        font-size: 16px !important;
+    }
+    
+    #harga {
+        font-size: 1.1rem !important;
+    }
+    
+    .fs-5 {
+        font-size: 1rem !important;
+    }
+    
+    .fs-1 {
+        font-size: 1.1rem !important;
+    }
+}
+
+/* Landscape orientation for mobile */
+@media (max-width: 767.98px) and (orientation: landscape) {
+    .row.mt-5 {
+        margin-top: 0.5rem !important;
+    }
+    
+    .card.mb-3.mt-5 {
+        margin-top: 1rem !important;
+    }
+    
+    .card-body.d-flex {
+        flex-direction: row !important;
+        align-items: center;
+    }
+    
+    .card-img-top {
+        width: 30% !important;
+    }
+    
+    .desc {
+        text-align: left;
+    }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+    .btn-outline-dark:hover {
+        transform: none;
+        transition: none;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .form-control {
+        border: 2px solid #000;
+    }
+    
+    .btn-outline-dark {
+        border-width: 2px;
+    }
+}
+
+/* Print styles */
+@media print {
+    .btn {
+        display: none;
+    }
+    
+    .card {
+        border: 1px solid #000;
+        box-shadow: none;
+    }
+    
+    .form-control {
+        border: 1px solid #000;
+        background: transparent !important;
+    }
+}

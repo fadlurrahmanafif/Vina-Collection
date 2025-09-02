@@ -32,4 +32,11 @@ class UserController extends Controller
             'title' => 'Status Pesanan'
         ]);
     }
+
+    public function checkout()
+    {
+        return view('user.page.checkout',[
+            'title' => 'Checkout'
+        ]);
+    }
 }

@@ -1,0 +1,134 @@
+ body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        main {
+            flex: 1;
+        }
+
+        /* Navbar styles */
+        .icon-nav {
+            color: #FFFFFF8C;
+        }
+
+        .icon-nav:hover {
+            color: rgb(255, 255, 255);
+        }
+
+        .icon-nav.active {
+            color: #fff !important;
+        }
+
+        .nav-link.active {
+            color: #fff !important;
+            font-weight: bold;
+            border-bottom: 2px solid white;
+        }
+
+        .notif {
+            position: relative;
+            display: inline-block;
+        }
+
+        .circle {
+            position: absolute;
+            top: -5px;
+            right: -10px;
+            width: 18px;
+            height: 18px;
+            font-size: 12px;
+            border-radius: 50%;
+            background-color: rgba(255, 49, 49, 0.9);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Footer responsif yang diperbaiki */
+        footer {
+            flex-shrink: 0;
+            background-color: #00D4E7;
+            color: white;
+            margin-top: auto;
+            padding: 30px 0;
+        }
+
+        /* Desktop footer layout */
+        @media (min-width: 768px) {
+            .footer-content {
+                display: flex;
+                justify-content: space-between;
+                gap: 2rem;
+            }
+            
+            .footer-column {
+                flex: 1;
+            }
+        }
+
+        /* Mobile footer layout - Stack vertically */
+        @media (max-width: 767px) {
+            footer {
+                padding: 20px 15px;
+                text-align: center;
+            }
+            
+            .footer-content {
+                display: flex;
+                flex-direction: column;
+                gap: 2rem;
+            }
+            
+            .footer-column {
+                width: 100% !important;
+                text-align: center;
+            }
+            
+            footer p {
+                font-size: 14px;
+                line-height: 1.5;
+                margin-bottom: 1rem;
+            }
+            
+            .header-title {
+                font-size: 1.25rem !important;
+            }
+            
+            /* Social media icons responsive */
+            .sosmed {
+                justify-content: center !important;
+                gap: 1.5rem !important;
+            }
+            
+            .sosmed i {
+                font-size: 1.5rem !important;
+            }
+        }
+
+        /* Extra small screens */
+        @media (max-width: 480px) {
+            footer {
+                padding: 15px 10px;
+            }
+            
+            footer p {
+                font-size: 12px;
+            }
+            
+            .header-title {
+                font-size: 1.1rem !important;
+            }
+        }
+
+        /* Utility untuk demo */
+        .demo-content {
+            min-height: 60vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }

@@ -1,0 +1,24 @@
+
+     .btn-c {
+            background-color: white;
+        }
+
+        .btn-c:hover {
+    background-color: #00D4E7 !important;
+    border-color: #00D4E7 !important;
+    color: white !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 212, 231, 0.3);
+        }
+
+        .btn-d {
+            background-color: white;
+        }
+
+        .btn-d:hover {
+    background-color: red !important;
+    border-color: red !important;
+    color: white !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 212, 231, 0.3);
+        }

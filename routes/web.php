@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/',[UserController::class,'index'])->name('home');
 Route::get('/cart',[UserController::class,'cart'])->name('keranjang');
 Route::get('/statuspesanan',[UserController::class,'statusPesanan'])->name('status.pesanan');
+Route::get('/checkout',[UserController::class,'checkout'])->name('checkout');
 
 
 // auth route
