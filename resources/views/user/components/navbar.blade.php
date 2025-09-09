@@ -21,7 +21,7 @@
                   @guest
                       <li class="nav-item">
                           <a href="{{ route('login') }}">
-                              <button type="button" class="btn btn-outline-light">Login | Register</button>
+                              <button type="submit" class="btn btn-outline-light">Login | Register</button>
                           </a>
                       </li>
                   @endguest

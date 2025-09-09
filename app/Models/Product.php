@@ -2,25 +2,30 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'nama_produk',
-        'deskripsi',
+        'kategori',
+        'tipe',
         'harga',
+        'foto',
         'stok',
-        'gambar',
     ];
 
-    public function cartItems()
-    {
-        return $this->hasMany(OrderItem::class);
-    }
+    protected $casts = [
+        'harga' => 'decimal:2',
+        'stok' => 'integer',
+    ];
 
-    public function orderItems()
+    // Accessor untuk URL foto
+    public function getFotoUrlAttribute()
     {
-        return $this->hasMany(OrderItem::class);
+        return $this->foto ? asset('storage/' . $this->foto) : null;
     }
 }

@@ -1,5 +1,5 @@
 @extends('user.layout.master')
-<link rel="stylesheet" href="{{ asset('css/index.css') }}">
+<link rel="stylesheet" href="{{ asset('css/user/index.css') }}">
 @section('content')
 
 {{-- Search & Filter - Enhanced Mobile First Design --}}

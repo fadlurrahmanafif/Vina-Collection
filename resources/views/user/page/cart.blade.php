@@ -1,5 +1,5 @@
 @extends('user.layout.master')
-<link rel="stylesheet" href="{{ asset('css/cart.css') }}">
+<link rel="stylesheet" href="{{ asset('css/user/cart.css') }}">
 @section('content')
     <h3 class="mt-5">Kerajang Belanja</h3>
     <div class="card mb-3">

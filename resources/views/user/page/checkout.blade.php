@@ -1,10 +1,6 @@
 @extends('user.layout.master')
-<link rel="stylesheet" href="{{ asset('css/checkout.css') }}">
+<link rel="stylesheet" href="{{ asset('css/user/checkout.css') }}">
 @section('content')
-    <style>
-        /* Additional responsive styles jika diperlukan */
-    </style>
-    
     <div class="container-fluid checkout-container">
         <div class="row mt-5">
             <!-- Form Data Section -->
@@ -17,6 +13,7 @@
                             <label for="nama_anda" class="col-form-label col-lg-3 col-md-4 col-sm-12">Nama Anda</label>
                             <div class="col-lg-9 col-md-8 col-sm-12">
                                 <input type="text" class="form-control" id="nama_anda" name="namaAnda"
+                                    value="{{ $user ? $user->nama : '' }}"
                                     placeholder="Masukkan Nama Anda" autofocus>
                             </div>
                         </div>
@@ -32,7 +29,8 @@
                         <div class="row mb-3">
                             <label for="tlp" class="col-form-label col-lg-3 col-md-4 col-sm-12">No.tlp Anda</label>
                             <div class="col-lg-9 col-md-8 col-sm-12">
-                                <input type="number" class="form-control" id="tlp" name="tlp"
+                                <input type="text" class="form-control" id="tlp" name="tlp"
+                                    value="{{ $user ? $user->no_hp : '' }}"
                                     placeholder="Masukkan Nomor Telepon">
                             </div>
                         </div>
@@ -141,7 +139,6 @@
         </div>
     </div>
 
-    <!-- JavaScript untuk responsive behavior -->
     <script>
         // Handle responsive layout changes
         function handleResponsiveLayout() {
@@ -151,7 +148,6 @@
             const desc = document.querySelector('.desc');
             
             if (screenWidth <= 767) {
-                // Mobile layout
                 if (productCard) {
                     productCard.style.flexDirection = 'column';
                     productCard.style.textAlign = 'center';
@@ -160,7 +156,6 @@
                     desc.style.textAlign = 'center';
                 }
             } else if (screenWidth <= 991) {
-                // Tablet layout
                 if (productCard) {
                     productCard.style.flexDirection = 'column';
                 }
@@ -168,7 +163,6 @@
                     desc.style.textAlign = 'center';
                 }
             } else {
-                // Desktop layout
                 if (productCard) {
                     productCard.style.flexDirection = 'row';
                     productCard.style.textAlign = 'left';
@@ -179,22 +173,28 @@
             }
         }
         
-        // Call on load and resize
         window.addEventListener('load', handleResponsiveLayout);
         window.addEventListener('resize', handleResponsiveLayout);
         
-        // Calculate total (existing functionality)
+        // Calculate total
         function calculateTotal() {
             const harga = document.getElementById('harga').value || 0;
             const qty = document.getElementById('qty').value || 1;
             const total = harga * qty;
             document.getElementById('total').value = new Intl.NumberFormat('id-ID').format(total);
+            
+            // Update subtotal dan total pembayaran
+            document.getElementById('subtotal').value = 'Rp. ' + new Intl.NumberFormat('id-ID').format(total);
+            document.getElementById('totalpembayaran').value = 'Rp. ' + new Intl.NumberFormat('id-ID').format(total);
         }
         
-        // Update total when quantity changes
         document.getElementById('qty').addEventListener('input', calculateTotal);
-        
-        // Initial calculation
         calculateTotal();
+
+        // Debug - tampilkan data user di console
+        console.log('User data:', {
+            nama: '{{ $user ? $user->nama : "tidak ada" }}',
+            no_hp: '{{ $user ? $user->no_hp : "tidak ada" }}'
+        });
     </script>
 @endsection
