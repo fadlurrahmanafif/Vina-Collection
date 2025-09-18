@@ -16,6 +16,7 @@ class Product extends Model
         'harga',
         'foto',
         'stok',
+        'stok_out'
     ];
 
     protected $casts = [
@@ -26,6 +27,11 @@ class Product extends Model
     // Accessor untuk URL foto
     public function getFotoUrlAttribute()
     {
-        return $this->foto ? asset('storage/' . $this->foto) : null;
+        return $this->foto ? asset('storage/produk/' . $this->foto) : null;
     }
+
+    // public function product()
+    // {
+    //     return $this->hasOne(Cart::class,'','id');
+    // }
 }

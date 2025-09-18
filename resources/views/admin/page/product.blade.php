@@ -70,31 +70,39 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($data as $y => $x)
-                            <tr class="align-middle">
-                                <td>{{ ++$y }}</td>
-                                <td>{{ $x->created_at }}</td>
-                                <td><img src="{{ asset('storage/produk/' . $x->foto) }}" alt="product"
-                                        style="width: 100px; height: 100px;"></td>
-                                <td>{{ $x->nama_produk }}</td>
-                                <td>{{ $x->kategori }}</td>
-                                <td>{{ $x->tipe }}</td>
-                                <td class="price-format">Rp {{ $x->harga }}</td>
-                                <td>{{ $x->stok }}</td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <button class="action-btn edit-btn editModal" type="button"
-                                            data-id="{{ $x->id }}">
-                                            <i class="material-icons">edit</i>
-                                        </button>
-                                        <button class="action-btn delete-btn deleteData" type="button"
-                                            data-id="{{ $x->id }}">
-                                            <i class="material-icons">delete</i>
-                                        </button>
-                                    </div>
-                                </td>
+
+
+                        @if ($data->isEmpty())
+                            <tr class="text-center">
+                                <td colspan="9">Barang Kosong</td>
                             </tr>
-                        @endforeach
+                        @else
+                            @foreach ($data as $y => $x)
+                                <tr class="align-middle">
+                                    <td>{{ ++$y }}</td>
+                                    <td>{{ $x->created_at }}</td>
+                                    <td><img src="{{ asset('storage/produk/' . $x->foto) }}" alt="product"
+                                            style="width: 120px; height: 130px;"></td>
+                                    <td>{{ $x->nama_produk }}</td>
+                                    <td>{{ $x->kategori }}</td>
+                                    <td>{{ $x->tipe }}</td>
+                                    <td class="price-format">Rp. {{ number_format($x->harga) }}</td>
+                                    <td>{{ $x->stok }}</td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="action-btn edit-btn editModal" type="button"
+                                                data-id="{{ $x->id }}">
+                                                <i class="material-icons">edit</i>
+                                            </button>
+                                            <button class="action-btn delete-btn deleteData" type="button"
+                                                data-id="{{ $x->id }}">
+                                                <i class="material-icons">delete</i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @endif
                     </tbody>
                 </table>
             </div>
@@ -102,7 +110,7 @@
                 <div class="showData">
                     Data ditampilkan {{ $data->count() }} dari {{ $data->total() }}
                 </div>
-                    {{ $data->links() }}
+                {{ $data->links() }}
             </div>
 
         </div>
@@ -129,13 +137,17 @@
                 const searchTerm = this.value.toLowerCase();
 
                 tableRows.forEach(row => {
-                    const productName = row.cells[3].textContent.toLowerCase();
-                    const sku = row.cells[2].textContent.toLowerCase();
-                    const category = row.cells[4].textContent.toLowerCase();
+                    const dateIn = row.cells[1].textContent.toLowerCase(); // Date In
+                    const foto = row.cells[2].textContent.toLowerCase(); // Foto/sku
+                    const productName = row.cells[3].textContent.toLowerCase(); // Nama Produk
+                    const category = row.cells[4].textContent.toLowerCase(); // Kategori
+                    const harga = row.cells[6].textContent.toLowerCase(); // Harga
 
                     if (productName.includes(searchTerm) ||
-                        sku.includes(searchTerm) ||
-                        category.includes(searchTerm)) {
+                        foto.includes(searchTerm) ||
+                        category.includes(searchTerm) ||
+                        dateIn.includes(searchTerm) ||
+                        harga.includes(searchTerm)) {
                         row.style.display = '';
                     } else {
                         row.style.display = 'none';
@@ -370,11 +382,25 @@
                 const startDate = document.querySelectorAll('.date-input')[0].value;
                 const endDate = document.querySelectorAll('.date-input')[1].value;
 
-                if (startDate && endDate) {
-                    alert(`Filtering products from ${startDate} to ${endDate}`);
-                } else {
+                if (!startDate || !endDate) {
                     alert('Please select both start and end dates');
+                    return;
                 }
+
+                // Ubah ke object Date agar bisa dibandingkan
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+
+                tableRows.forEach(row => {
+                    const dateInText = row.cells[1].textContent.trim(); // kolom Date In
+                    const rowDate = new Date(dateInText);
+
+                    if (rowDate >= start && rowDate <= end) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
             });
 
             // Notification and user avatar

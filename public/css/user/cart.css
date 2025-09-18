@@ -1,24 +1,121 @@
+/* Base styles untuk kedua tombol */
+.btn-c,
+.btn-d {
+    background-color: white;
+    transition: all 0.3s ease;
+    /* Smooth animation */
+    border: 1px solid #dee2e6;
+    /* Border default */
+    position: relative;
+    /* Untuk transform */
+}
 
-     .btn-c {
-            background-color: white;
-        }
-
-        .btn-c:hover {
+/* Checkout Button (btn-c) */
+.btn-c:hover {
     background-color: #00D4E7 !important;
     border-color: #00D4E7 !important;
     color: white !important;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 212, 231, 0.3);
-        }
+}
 
-        .btn-d {
-            background-color: white;
-        }
+.btn-c:active {
+    transform: translateY(-1px);
+    /* Saat diklik */
+    box-shadow: 0 2px 8px rgba(0, 212, 231, 0.4);
+}
 
-        .btn-d:hover {
-    background-color: red !important;
-    border-color: red !important;
+/* Delete Button (btn-d) */
+.btn-d:hover {
+    background-color: #dc3545 !important;
+    /* Bootstrap red yang konsisten */
+    border-color: #dc3545 !important;
     color: white !important;
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    /* Shadow merah, bukan biru */
+}
+
+.btn-d:active {
+    transform: translateY(-1px);
+    /* Saat diklik */
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4);
+}
+
+/* Focus states untuk accessibility */
+.btn-c:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 212, 231, 0.25);
+}
+
+.btn-d:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25);
+}
+
+/* Loading state (opsional) */
+.btn-c:disabled,
+.btn-d:disabled {
+    transform: none;
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Alternative: Jika ingin menggunakan dengan Bootstrap classes */
+.btn-checkout {
+    background-color: white;
+    border-color: #dee2e6;
+    color: #212529;
+    transition: all 0.3s ease;
+}
+
+.btn-checkout:hover {
+    background-color: #00D4E7;
+    border-color: #00D4E7;
+    color: white;
+    transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 212, 231, 0.3);
-        }
+}
+
+.btn-delete {
+    background-color: white;
+    border-color: #dee2e6;
+    color: #212529;
+    transition: all 0.3s ease;
+}
+
+.btn-delete:hover {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+
+    .btn-c:hover,
+    .btn-d:hover {
+        transform: translateY(-1px);
+        /* Lebih subtle di mobile */
+    }
+
+    .btn-c,
+    .btn-d {
+        font-size: 14px;
+        /* Sedikit lebih kecil di mobile */
+        padding: 8px 12px;
+    }
+}
+
+/* Dark mode support (opsional) */
+@media (prefers-color-scheme: dark) {
+
+    .btn-c,
+    .btn-d {
+        background-color: #2d3748;
+        border-color: #4a5568;
+        color: #e2e8f0;
+    }
+}

@@ -3,22 +3,22 @@
 @section('content')
     <div class="main-content">
         <div class="top-bar">
-        <div class="page-title">
-            <h1>Dashboard</h1>
-            <div class="breadcrumb">Home / Dashboard</div>
-        </div>
+            <div class="page-title">
+                <h1>Dashboard</h1>
+                <div class="breadcrumb">Home / Dashboard</div>
+            </div>
 
-        <div class="user-info">
-            <button class="notification-btn">
-                <i class="material-icons">notifications</i>
-                <span class="notification-badge">3</span>
-            </button>
+            <div class="user-info">
+                <button class="notification-btn">
+                    <i class="material-icons">notifications</i>
+                    <span class="notification-badge">3</span>
+                </button>
 
-            <div class="user-avatar">
-                <i class="material-icons">person</i>
+                <div class="user-avatar">
+                    <i class="material-icons">person</i>
+                </div>
             </div>
         </div>
-    </div>
         <div class="dashboard-content">
             <!-- Statistics Cards -->
             <div class="stats-grid">
@@ -27,9 +27,8 @@
                         <div class="stat-icon products">
                             <i class="material-icons">inventory_2</i>
                         </div>
-                        <div class="stat-change positive">+12.5%</div>
                     </div>
-                    <div class="stat-value">1,234</div>
+                    <div class="stat-value">{{ number_format($totalProduk, 0, ',', '.') }}</div>
                     <div class="stat-label">Total Products</div>
                 </div>
 
@@ -38,9 +37,8 @@
                         <div class="stat-icon orders">
                             <i class="material-icons">shopping_cart</i>
                         </div>
-                        <div class="stat-change positive">+8.2%</div>
                     </div>
-                    <div class="stat-value">567</div>
+                    <div class="stat-value">{{ number_format($totalPesanan, 0, ',', '.') }}</div>
                     <div class="stat-label">Total Orders</div>
                 </div>
 
@@ -49,21 +47,9 @@
                         <div class="stat-icon users">
                             <i class="material-icons">people</i>
                         </div>
-                        <div class="stat-change positive">+15.3%</div>
                     </div>
-                    <div class="stat-value">2,891</div>
+                    <div class="stat-value">{{ number_format($totalUser, 0, ',', '.') }}</div>
                     <div class="stat-label">Total Users</div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon revenue">
-                            <i class="material-icons">payments</i>
-                        </div>
-                        <div class="stat-change negative">-2.4%</div>
-                    </div>
-                    <div class="stat-value">Rp 45.2M</div>
-                    <div class="stat-label">Total Revenue</div>
                 </div>
             </div>
 
@@ -90,37 +76,44 @@
             <div class="recent-activity">
                 <h3 class="chart-title">Recent Activity</h3>
 
-                <div class="activity-item">
-                    <div class="activity-icon">
-                        <i class="material-icons">shopping_cart</i>
+                @if ($recentPesanan)
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="material-icons">shopping_cart</i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">New order #{{ $recentPesanan->id }} received</div>
+                            <div class="activity-time">{{ $recentPesanan->created_at->diffForHumans() }}</div>
+                        </div>
                     </div>
-                    <div class="activity-content">
-                        <div class="activity-title">New order #1234 received</div>
-                        <div class="activity-time">2 minutes ago</div>
-                    </div>
-                </div>
+                @endif
 
-                <div class="activity-item">
-                    <div class="activity-icon">
-                        <i class="material-icons">person_add</i>
+                @if ($recentUser)
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="material-icons">person_add</i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">New user registered ({{ $recentUser->name }})</div>
+                            <div class="activity-time">{{ $recentUser->created_at->diffForHumans() }}</div>
+                        </div>
                     </div>
-                    <div class="activity-content">
-                        <div class="activity-title">New user registered</div>
-                        <div class="activity-time">5 minutes ago</div>
-                    </div>
-                </div>
+                @endif
 
-                <div class="activity-item">
-                    <div class="activity-icon">
-                        <i class="material-icons">inventory</i>
+                @if ($recentProduk)
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="material-icons">inventory</i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">Product "{{ $recentProduk->nama_produk }}" added/updated</div>
+                            <div class="activity-time">{{ $recentProduk->created_at->diffForHumans() }}</div>
+                        </div>
                     </div>
-                    <div class="activity-content">
-                        <div class="activity-title">Product stock updated</div>
-                        <div class="activity-time">12 minutes ago</div>
-                    </div>
-                </div>
+                @endif
 
-                <div class="activity-item">
+
+                {{-- <div class="activity-item">
                     <div class="activity-icon">
                         <i class="material-icons">payment</i>
                     </div>
@@ -138,7 +131,7 @@
                         <div class="activity-title">New product review submitted</div>
                         <div class="activity-time">2 hours ago</div>
                     </div>
-                </div>
+                </div> --}}
             </div>
         </div>
     </div>

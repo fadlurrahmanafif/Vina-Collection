@@ -7,9 +7,27 @@ use Illuminate\Support\Facades\Route;
 
 // user route
 Route::get('/', [UserController::class, 'index'])->name('home');
+
 Route::get('/cart', [UserController::class, 'cart'])->name('keranjang');
-Route::get('/statuspesanan', [UserController::class, 'statusPesanan'])->name('status.pesanan');
-Route::get('/checkout', [UserController::class, 'checkout'])->name('checkout');
+Route::post('/addCart', [UserController::class, 'addCart'])->name('add.to.cart');
+Route::delete('/cart/delete/{id}', [UserController::class, 'destroyCart'])->name('delete.cart');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/checkout', [UserController::class, 'checkout'])->name('checkout');
+    Route::post('/checkout/proses/{id}', [UserController::class, 'checkoutProses'])->name('checkout.proses');
+    Route::post('/prosespembayaran', [UserController::class, 'prosesPembayaran'])->name('proses.pembayaran');
+
+
+    Route::get('/statuspesanan', [UserController::class, 'statusPesanan'])->name('status.pesanan');
+
+    // Route fitur pesanan diterima dan dibatalkan
+    Route::post('konfirmasi-pesanan-diterima', [UserController::class, 'konfirmasiPesanan'])->name('konfirmasi.pesanan.diterima');
+    Route::post('batalkan-pesanan', [UserController::class, 'batalkanPesanan'])->name('batalkan.pesanan');
+
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+});
+
+
 
 // auth admin route
 Route::middleware('guest')->group(function () {
@@ -21,8 +39,12 @@ Route::middleware('guest')->group(function () {
 // Admin route
 Route::middleware(['admin'])->group(function () {
     Route::get('/dasboard', [AdminController::class, 'dasboard'])->name('dasboard');
-    Route::get('/datapesanan', [AdminController::class, 'dataPesanan'])->name('data.pesanan');
     Route::get('/userdata', [AdminController::class, 'userData'])->name('user.data');
+
+    Route::get('/datapesanan', [AdminController::class, 'dataPesanan'])->name('data.pesanan');
+    // Route untuk update status pesanan
+    Route::patch('/admin/pesanan/update-status/{id}', [AdminController::class, 'updateStatusPesanan'])->name('admin.update.status.pesanan');
+    Route::delete('/admin/pesanan/delete/{id}', [AdminController::class, 'destroyPesanan'])->name('admin.delete.pesanan');
 
     // product crud route
     Route::get('/product', [AdminController::class, 'product'])->name('product');
@@ -46,9 +68,4 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'register'])->name('register.post');
     // reset password
     Route::get('/forgot', [AuthController::class, 'showForgot'])->name('reset.password');
-});
-
-// user logout route
-Route::middleware('auth')->group(function () {
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });

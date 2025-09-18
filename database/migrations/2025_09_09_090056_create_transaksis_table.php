@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('nama_costumer');
             $table->string('alamat');
             $table->string('no_tlp');
+            $table->string('ekspedisi');
             $table->timestamps();
         });
     }
