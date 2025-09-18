@@ -33,7 +33,6 @@
             bottom: 0;
             display: flex;
             align-items: center;
-            /* bikin selalu tengah */
             cursor: pointer;
             font-size: 25px;
             color: #6c757d;
@@ -52,6 +51,25 @@
                     <img src="{{ asset('asset/images/Logo-removebg.png') }}" class="img-fluid" alt="Sample image">
                 </div>
                 <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
+                    {{-- TAMBAHAN: Alert jika dari checkout redirect --}}
+                    @if (session('checkout_redirect'))
+                        <div class="alert alert-info alert-dismissible fade show" role="alert">
+                            <i class="fas fa-shopping-cart me-2"></i>
+                            <strong>Hampir selesai!</strong> Login untuk melanjutkan checkout dan menyelesaikan pesanan
+                            Anda.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    @endif
+
+                    {{-- TAMBAHAN: Warning message --}}
+                    @if (session('warning'))
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            {{ session('warning') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    @endif
+
                     <form action="{{ route('login.post') }} " method="POST">
                         @csrf
                         <div class="d-flex flex-row align-items-center justify-content-center justify-content-lg-start">
@@ -82,7 +100,6 @@
                             @enderror
                         </div>
 
-
                         <!-- Password -->
                         <div class="form-outline mb-3">
                             <label class="form-label">Password</label>
@@ -112,11 +129,33 @@
 
                         <div class="text-center text-lg-start mt-4 pt-2">
                             <button type="submit" data-mdb-button-init data-mdb-ripple-init
-                                class="btn btn-outline-dark btn-lg"
-                                style="padding-left: 2.5rem; padding-right: 2.5rem;">Login</button>
+                                class="btn btn-outline-dark btn-lg" style="padding-left: 2.5rem; padding-right: 2.5rem;">
+                                {{-- PERUBAHAN: Tampilkan text berbeda jika dari checkout --}}
+                                @if (session('checkout_redirect'))
+                                    <i class="fas fa-shopping-cart me-2"></i>Login & Lanjut Checkout
+                                @else
+                                    Login
+                                @endif
+                            </button>
                             <p class="small fw-bold mt-2 pt-1 mb-0">Don't have an account? <a href="/regis"
                                     class="link-danger">Register</a></p>
                         </div>
+
+                        {{-- TAMBAHAN: Info untuk checkout --}}
+                        @if (session('checkout_redirect'))
+                            <div class="mt-4 p-3 bg-light rounded">
+                                <h6 class="text-primary mb-2">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Mengapa perlu login?
+                                </h6>
+                                <ul class="small mb-0">
+                                    <li>Untuk menyimpan data pengiriman</li>
+                                    <li>Melacak status pesanan</li>
+                                    <li>Riwayat pembelian</li>
+                                    <li>Keamanan transaksi</li>
+                                </ul>
+                            </div>
+                        @endif
 
                     </form>
                 </div>
@@ -131,7 +170,6 @@
             <!-- Copyright -->
         </div>
     </section>
-
 
     <script>
         function togglePassword() {

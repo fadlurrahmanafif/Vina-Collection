@@ -14,39 +14,117 @@ use RealRashid\SweetAlert\Facades\Alert;
 
 class UserController extends Controller
 {
-    // home
-    public function index(Request $request)
+
+    private function getCartCount()
     {
-        $query = Product::query();
-
-        //search
-        if ($request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
+        if (Auth::check()) {
+            return Cart::where('id_user', Auth::id())->where('status', 0)->count();
+        } else {
+            $sessionCart = Session::get('guest_cart', []);
+            return count($sessionCart);
         }
+    }
 
-        if ($request->filled('min_price')) {
-            $query->where('price', '>=', $request->min_price);
-        }
+    private function mergeGuestCartToUser()
+    {
+        if (!Auth::check()) return;
 
-        if ($request->filled('max_price')) {
-            $query->where('price', '<=', $request->max_price);
-        }
+        $guestCart = Session::get('guest_cart', []);
 
-        if ($request->filled('stok')) {
-            if ($request->stock === 'avaible') {
-                $query->where('stock', '>', 0);
-            } elseif ($request->stock === 'empty') {
-                $query->where('stock', '=', 0);
+        foreach ($guestCart as $item) {
+            $existingCart = Cart::where([
+                'id_user' => Auth::id(),
+                'id_barang' => $item['id_barang'],
+                'status' => 0,
+            ])->first();
+
+            if ($existingCart) {
+                $existingCart->stok += $item['stok'];
+                $existingCart->harga += $item['total_harga'];
+                $existingCart->save();
+            } else {
+
+                Cart::create([
+                    'id_user' => Auth::id(),
+                    'id_barang' => $item['id_barang'],
+                    'stok' => $item['stok'],
+                    'harga' => $item['total_harga'],
+                    'status' => 0,
+                ]);
             }
         }
 
-        $best = Product::where('stok_out', '>=', '10')->get();
-        $data = Product::all();
-        $countKeranjang = Cart::where(['id_user' => 'guest123', 'status' => 0])->count();
+        Session::forget('guest_cart');
+    }
+
+    // home - DIPERBAIKI UNTUK SEARCH & FILTER
+    public function index(Request $request)
+    {
+        $search = $request->input('search');
+        $min_price = $request->input('min_price');
+        $max_price = $request->input('max_price');
+        $stok = $request->input('stok');
+
+        // Produk umum
+        $products = Product::query()
+            ->when($search, function ($q) use ($search) {
+                $q->where('nama_produk', 'LIKE', '%' . $search . '%');
+            })
+            ->when($min_price, function ($q) use ($min_price) {
+                $q->where('harga', '>=', $min_price);
+            })
+            ->when($max_price, function ($q) use ($max_price) {
+                $q->where('harga', '<=', $max_price);
+            })
+            ->when($stok, function ($q) use ($stok) {
+                $q->where('stok', '>=', $stok);
+            })
+            ->get();
+
+        // Best Seller (pakai stok_out >= 10 + ikut filter)
+        $best = Product::query()
+            ->where('stok_out', '>=', 10)
+            ->when($search, function ($q) use ($search) {
+                $q->where('nama_produk', 'LIKE', '%' . $search . '%');
+            })
+            ->when($min_price, function ($q) use ($min_price) {
+                $q->where('harga', '>=', $min_price);
+            })
+            ->when($max_price, function ($q) use ($max_price) {
+                $q->where('harga', '<=', $max_price);
+            })
+            ->when($stok, function ($q) use ($stok) {
+                $q->where('stok', '>=', $stok);
+            })
+            ->orderBy('stok_out', 'desc')
+            ->take(5)
+            ->get();
+
+        // Produk Terbaru
+        $newProduct = Product::query()
+            ->latest()
+            ->when($search, function ($q) use ($search) {
+                $q->where('nama_produk', 'LIKE', '%' . $search . '%');
+            })
+            ->when($min_price, function ($q) use ($min_price) {
+                $q->where('harga', '>=', $min_price);
+            })
+            ->when($max_price, function ($q) use ($max_price) {
+                $q->where('harga', '<=', $max_price);
+            })
+            ->when($stok, function ($q) use ($stok) {
+                $q->where('stok', '>=', $stok);
+            })
+            ->take(5)
+            ->get();
+
+        $countKeranjang = $this->getCartCount();
+
         return view('user.page.index', [
             'title' => 'Home',
-            'data' =>  $data,
-            'best' => $best,
+            'products' => $products,   // produk umum
+            'best' => $best,           // best seller
+            'newProduct' => $newProduct, // produk terbaru
             'count' => $countKeranjang,
         ]);
     }
@@ -55,51 +133,132 @@ class UserController extends Controller
     public function addCart(Request $request)
     {
         $idProduct = $request->input('idProduct');
-
-        $db = new Cart;
         $product = Product::find($idProduct);
-        $harga = $product->harga;
 
-        $field = [
-            'id_user' => 'guest123',
-            'id_barang' => $idProduct,
-            'stok' => 1,
-            'harga' => $harga, // Simpan angka murni saja
-        ];
+        if (!$product) {
+            Alert::error('Error', 'Produk tidak di temukan');
+            return redirect()->bacl();
+        }
 
-        $db::create($field);
+        if ($product->stok <= 0) {
+            Alert::error('Error', 'Stok produk habis');
+            return redirect()->back();
+        }
+
+        if (Auth::check()) {
+            $existingCart = Cart::where([
+                'id_user' => Auth::id(),
+                'id_barang' => $idProduct,
+                'status' => 0,
+            ])->first();
+
+            if ($existingCart) {
+                $existingCart->stok += 1;
+                $existingCart->harga += $product->harga;
+                $existingCart->save();
+            } else {
+                Cart::create([
+                    'id_user' => Auth::id(),
+                    'id_barang' => $idProduct,
+                    'stok' => 1,
+                    'harga' => $product->harga,
+                    'status' => 0,
+                ]);
+            }
+        } else {
+            $guestCart = Session::get('guest_cart', []);
+
+            if (isset($guestCart[$idProduct])) {
+                $guestCart[$idProduct]['stok'] += 1;
+                $guestCart[$idProduct]['total_harga'] += $product->harga;
+            } else {
+                $guestCart[$idProduct] = [
+                    'id_barang' => $idProduct,
+                    'nama_produk' => $product->nama_produk,
+                    'harga_satuan' => $product->harga,
+                    'stok' => 1,
+                    'total_harga' => $product->harga,
+                    'foto' => $product->foto,
+                ];
+            }
+
+            Session::put('guest_cart', $guestCart);
+        }
+
+        Alert::success('Berhasil!', 'Produk berhasil di tambahkan ke keranjang');
         return redirect('/');
     }
 
     public function destroyCart($id)
     {
-        $data = Cart::findOrFail($id);
-        $data->delete();
-        Alert::toast('Data berhasil dihapus', 'success');
+        if (Auth::check()) {
+            $cartItems = Cart::where('id_user', Auth::id())
+            ->where('id', $id)
+            ->first();
+
+            if ($cartItems) {
+                $cartItems->delete();
+                Alert::success('Berhasil!', 'Item berhasil di hapus dari keranjang');
+            } else {
+                Alert::error('Error', 'Item tidak ditemukan');
+            }
+        } else {
+            $guestCart = Session::get('guest_cart', []);
+
+            if (isset($guestCart[$id])) {
+                unset($guestCart[$id]);
+                Session::put('guest_cart', $guestCart);
+                Alert::success('Berhasil!', 'Item berhasil di hapus dari keranjang');
+            } else {
+                Alert::error('Error', 'Item tidak ditemukan');
+            }
+        }
+
         return redirect()->route('keranjang');
     }
 
     public function cart()
     {
-        $db = Cart::with('product')->where(['id_user' => 'guest123', 'status' => 0])->get();
-        // dd($db->product->nama_produk);die;
-        $countKeranjang = Cart::where(['id_user' => 'guest123', 'status' => 0])->count();
-        return view('user.page.cart', [
-            'title' => 'Keranjang',
-            'count' => $countKeranjang,
-            'data' => $db,
-        ]);
+
+        $countKeranjang = $this->getCartCount();
+
+        if (Auth::check()) {
+            $cartItems = Cart::with('product')
+                ->where('id_user', Auth::id())
+                ->where('status', 0)
+                ->get();
+
+            return view('user.page.cart', [
+                'title' => 'Keranjang',
+                'count' => $countKeranjang,
+                'data' => $cartItems,
+                'is_guest' => false,
+            ]);
+        } else {
+            $sessionCart = Session::get('guest_cart', []);
+            $cartItems = collect($sessionCart);
+
+            return view('user.page.cart', [
+                'title' => 'Keranjang',
+                'count' => $countKeranjang,
+                'data' => $cartItems,
+                'is_guest' => true,
+            ]);
+        }
     }
 
     // Status pesanan
     public function statusPesanan()
     {
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('warning', 'Silahkan login untuk melihat status pesanan');
+        }
 
-        $countKeranjang = Cart::where(['id_user' => 'guest123', 'status' => 0])->count();
+        $countKeranjang = $this->getCartCount();
 
         // Ambil data transaksi user dengan relasi details
         $transaksiUser = transaksi::with(['details.product'])
-            ->where('id_user', 'guest123')
+            ->where('id_user', Auth::id())
             ->orderBy('tanggal_pemesanan', 'desc')
             ->get();
 
@@ -195,33 +354,32 @@ class UserController extends Controller
     // checkout
     public function checkout()
     {
-        // Ambil data user yang login
-        $user = Auth::user();
-
         if (!Auth::check()) {
             return redirect()->route('login')
                 ->with('warning', 'Anda harus login terlebih dahulu untuk melakukan checkout.')
-                ->with('redirect_after_login', url()->current());
+                ->with('checkout_redirect', true);
         }
+
+        // Merge session cart ke database jika user baru login
+        $this->mergeGuestCartToUser();
+
+        // Ambil data user yang login
+        $user = Auth::user();
 
         // PERBAIKAN: Ambil cart items yang sudah di-checkout (status = 1)
         // Ini adalah barang yang tadi di-checkout dari halaman cart
         $cartItems = Cart::with('product')
             ->where([
-                'id_user' => 'guest123',
+                'id_user' => Auth::id(),
                 'status' => 1  // Status 1 = sudah di-checkout
             ])
             ->get();
 
         // Hitung total dari cart items yang sudah di-checkout
-        $detailBelanja = 0;
-        foreach ($cartItems as $item) {
-            // Gunakan harga yang tersimpan di cart (sudah dikalikan dengan stok)
-            $detailBelanja += $item->harga;
-        }
+        $detailBelanja = $cartItems->sum('harga');
 
         // Count keranjang yang belum di-checkout untuk navbar
-        $countKeranjang = Cart::where(['id_user' => 'guest123', 'status' => 0])->count();
+        $countKeranjang = $this->getCartCount();
 
         return view('user.page.checkout', [
             'title' => 'Checkout',
@@ -235,28 +393,23 @@ class UserController extends Controller
     // Method checkoutProses() - pastikan ini benar
     public function checkoutProses(Request $request, $id)
     {
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
         $data = $request->all();
-
-        // Generate kode transaksi
-        $code = transaksi::count();
-        $codeTransaksi = date('Ymd') . $code;
-
+        
         // Bersihkan format harga/total sebelum disimpan
         $totalBersih = (int) preg_replace('/[^0-9]/', '', $data['total']);
 
-        // // Simpan detail barang ke tabel detail_transaksi
-        // DetailTransaksi::create([
-        //     'id_transaksi' => $codeTransaksi,
-        //     'id_barang' => $data['id_barang'],
-        //     'stok' => $data['stok'],
-        //     'harga' => $totalBersih,
-        // ]);
 
         // PENTING: Update cart dengan status = 1 (sudah di-checkout)
-        Cart::where('id', $id)->update([
+        Cart::where('id_user' , Auth::id())
+        ->where('id', $id)
+        ->update([
             'stok' => $data['stok'],
-            'harga' => $totalBersih,  // Total harga (harga satuan * stok)
-            'status' => 1,  // Ubah status menjadi 1 = sudah di-checkout
+            'harga' => $totalBersih,
+            'status' => 1,
         ]);
 
         Alert::toast('Berhasil Checkout', 'success');
@@ -265,6 +418,9 @@ class UserController extends Controller
 
     public function prosesPembayaran(Request $request)
     {
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
         try {
             $data = $request->all();
 
@@ -275,7 +431,7 @@ class UserController extends Controller
             // Ambil cart items yang sudah di-checkout (status = 1)
             $cartItems = Cart::with('product')
                 ->where([
-                    'id_user' => 'guest123',
+                    'id_user' => Auth::id(),
                     'status' => 1
                 ])
                 ->get();
@@ -347,7 +503,7 @@ class UserController extends Controller
                 'total_pembayaran' => $totalPembayaran,
                 'status_pesanan' => 'pending',
                 'tanggal_pemesanan' => now(),
-                'id_user' => 'guest123',
+                'id_user' => Auth::id(),
             ]);
 
             // Simpan detail transaksi untuk setiap item
@@ -374,7 +530,7 @@ class UserController extends Controller
 
             // Hapus cart items yang sudah diproses (status = 1)
             Cart::where([
-                'id_user' => 'guest123',
+                'id_user' => Auth::id(),
                 'status' => 1
             ])->delete();
 

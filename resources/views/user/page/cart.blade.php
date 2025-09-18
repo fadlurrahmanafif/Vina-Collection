@@ -1,176 +1,234 @@
 @extends('user.layout.master')
-<link rel="stylesheet" href="{{ asset('css/user/cart.css') }}">
+
 @section('content')
-    <h3 class="mt-5 mb-5">Keranjang Belanja</h3>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h3 class="mb-4">
+                    <i class="fas fa-shopping-cart me-2"></i>
+                    Keranjang Belanja
+                </h3>
 
-    @if (!$data || count($data) == 0)
-        <div class="empty-cart text-center">
-            <h4>Keranjang Belanja Kosong</h4>
-            <p>Silahkan pilih produk terlebih dahulu</p>
-            <a href="/" class="btn btn-outline-dark">Belanja Sekarang</a>
-        </div>
-    @else
-        <div class="cart-container">
-            @foreach ($data as $x)
-                <div class="card mb-3 cart-item" data-product-id="{{ $x->product->id }}">
-                    <div class="card-body d-flex gap-5 align-items-center">
-                        <img src="{{ asset('storage/produk/' . $x->product->foto) }}" class="card-img-top" alt="Product"
-                            style="width: 25%; height: 25%;">
-                        <form action="{{ route('checkout.proses', $x->id) }}" method="POST" class="w-100">
-                            @csrf
-                            <div class="desc w-100">
-                                <p style="font-size: 24px; font-weight: 700;">{{ $x->product->nama_produk }}</p>
-                                <input type="hidden" name="id_barang" value="{{ $x->product->id }}">
+                {{-- Alert untuk user yang belum login --}}
+                @if (!auth()->check())
+                    <div class="alert alert-info alert-dismissible fade show" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Informasi:</strong> Anda belum login. Untuk melanjutkan checkout, silakan login terlebih
+                        dahulu.
+                        <a href="{{ route('login') }}" class="alert-link">Login sekarang</a>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                @endif
 
-                                <!-- Tampilkan harga dengan format Rupiah yang benar -->
-                                <div class="price-display fs-4 mb-2">
-                                    Rp. {{ number_format($x->product->harga, 0, ',', '.') }}
+                {{-- Cart Items --}}
+                @if ($data->count() > 0 || (isset($is_guest) && $is_guest && $data->isNotEmpty()))
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <div class="card shadow-sm">
+                                <div class="card-body">
+                                    @if (isset($is_guest) && $is_guest)
+                                        {{-- GUEST USER - Data dari Session --}}
+                                        @foreach ($data as $productId => $item)
+                                            <div class="row align-items-center py-3 border-bottom">
+                                                <div class="col-md-2">
+                                                    <img src="{{ asset('storage/produk/' . $item['foto']) }}"
+                                                        class="img-fluid rounded" alt="Product" style="max-height: 80px;">
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <h6 class="mb-1">{{ $item['nama_produk'] }}</h6>
+                                                    <small class="text-muted">Produk</small>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <span class="fw-bold">Rp
+                                                        {{ number_format($item['harga_satuan']) }}</span>
+                                                    <br>
+                                                    <small class="text-muted">per item</small>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text">Qty:</span>
+                                                        <input type="text" class="form-control text-center"
+                                                            value="{{ $item['quantity'] }}" readonly>
+                                                    </div>
+                                                    <small class="text-primary">Total: Rp
+                                                        {{ number_format($item['total_harga']) }}</small>
+                                                </div>
+                                                <div class="col-md-2 text-end">
+                                                    <form action="{{ route('delete.cart', $productId) }}" method="POST"
+                                                        class="d-inline">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-outline-danger btn-sm"
+                                                            onclick="return confirm('Hapus item ini dari keranjang?')">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    @else
+                                        {{-- USER LOGIN - Data dari Database --}}
+                                        @foreach ($data as $item)
+                                            <div class="row align-items-center py-3 border-bottom">
+                                                <div class="col-md-2">
+                                                    <img src="{{ asset('storage/produk/' . $item->product->foto) }}"
+                                                        class="img-fluid rounded" alt="Product" style="max-height: 80px;">
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <h6 class="mb-1">{{ $item->product->nama_produk }}</h6>
+                                                    <small class="text-muted">Produk</small>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <span class="fw-bold">Rp
+                                                        {{ number_format($item->product->harga) }}</span>
+                                                    <br>
+                                                    <small class="text-muted">per item</small>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text">Qty:</span>
+                                                        <input type="text" class="form-control text-center"
+                                                            value="{{ $item->stok }}" readonly>
+                                                    </div>
+                                                    <small class="text-primary">Total: Rp
+                                                        {{ number_format($item->harga) }}</small>
+                                                </div>
+                                                <div class="col-md-2 text-end">
+                                                    <form action="{{ route('delete.cart', $item->id) }}" method="POST"
+                                                        class="d-inline">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-outline-danger btn-sm"
+                                                            onclick="return confirm('Hapus item ini dari keranjang?')">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    @endif
                                 </div>
+                            </div>
+                        </div>
 
-                                <!-- PENTING: Hidden input harga menggunakan harga dari produk, bukan dari cart -->
-                                <input type="hidden" name="harga" class="harga" value="{{ $x->product->harga }}">
+                        {{-- Order Summary --}}
+                        <div class="col-lg-4 mt-4 mt-lg-0">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">Ringkasan Pesanan</h5>
+                                </div>
+                                <div class="card-body">
+                                    @php
+                                        $subtotal = 0;
+                                        if (isset($is_guest) && $is_guest) {
+                                            $subtotal = $data->sum('total_harga');
+                                        } else {
+                                            $subtotal = $data->sum('harga');
+                                        }
+                                        $shipping = 15000; // Bisa disesuaikan
+                                        $total = $subtotal + $shipping;
+                                    @endphp
 
-                                <div class="row mb-3 mt-3 align-items-center">
-                                    <label for="qty" class="col-sm-2 col-form-label fs-5">Jumlah</label>
-                                    <div class="d-flex col-sm-5">
-                                        <button class="rounded-start bg-secondary p-2 border border-0 plus"
-                                            type="button">+</button>
-
-                                        <!-- Input quantity -->
-                                        <input type="number" name="stok" class="form-control w-25 text-center qty"
-                                            min="1" max="999"
-                                            value="{{ $x->stok && $x->stok > 0 && $x->stok <= 999 ? $x->stok : 1 }}"
-                                            readonly>
-                                        <button class="rounded-end bg-secondary p-2 border border-0 minus"
-                                            type="button">-</button>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Subtotal:</span>
+                                        <span class="fw-bold">Rp {{ number_format($subtotal) }}</span>
                                     </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Estimasi Ongkir:</span>
+                                        <span>Rp {{ number_format($shipping) }}</span>
+                                    </div>
+                                    <hr>
+                                    <div class="d-flex justify-content-between mb-3">
+                                        <strong>Estimasi Total:</strong>
+                                        <strong class="text-primary">Rp {{ number_format($total) }}</strong>
+                                    </div>
+
+                                    @auth
+                                        {{-- Jika sudah login, bisa langsung checkout --}}
+                                        <a href="{{ route('checkout') }}" class="btn btn-primary w-100">
+                                            <i class="fas fa-credit-card me-2"></i>
+                                            Lanjut ke Checkout
+                                        </a>
+                                        <small class="text-muted d-block text-center mt-2">
+                                            Ongkir akan dihitung saat checkout
+                                        </small>
+                                    @else
+                                        {{-- Jika belum login, tampilkan tombol yang redirect ke login --}}
+                                        <button type="button" class="btn btn-warning w-100 mb-2"
+                                            onclick="showCheckoutLoginModal()">
+                                            <i class="fas fa-sign-in-alt me-2"></i>
+                                            Login untuk Checkout
+                                        </button>
+                                        <small class="text-muted d-block text-center">
+                                            Anda perlu login untuk melanjutkan checkout
+                                        </small>
+                                    @endauth
                                 </div>
                             </div>
 
-                            <div class="row align-items-center mb-3">
-                                <label for="price" class="col-sm-2 fs-5">Total</label>
-                                <!-- Input total yang akan diisi oleh JavaScript -->
-                                <input type="text" class="col-sm-5 form-control w-25 border-0 fs-5 total" name="total"
-                                    readonly placeholder="Rp. 0">
+                            {{-- Continue Shopping --}}
+                            <div class="mt-3 text-center">
+                                <a href="{{ route('home') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i>
+                                    Lanjut Belanja
+                                </a>
                             </div>
-
-                            <div class="row w-50 gap-1 mt-5">
-                                <button type="submit" class="btn btn-outline-dark btn-c">
-                                    <i class="fa fa-shopping-cart"></i>
-                                    Checkout
-                                </button>
-                        </form>
-
-                        <form action="{{ route('delete.cart', $x->id) }}" method="POST">
-                            <div class="d-flex row">
-                                @csrf
-                                @method('DELETE')
-                                <button class="btn btn-d btn-outline-danger delete-item" type="submit"
-                                    data-product-id="{{ $x->product->id }}">
-                                    <i class="fa fa-trash"></i>
-                                    Delete
-                                </button>
-                            </div>
-                        </form>
+                        </div>
                     </div>
-                </div>
-            @endforeach
+                @else
+                    {{-- Empty Cart --}}
+                    <div class="text-center py-5">
+                        <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+                        <h4>Keranjang Kosong</h4>
+                        <p class="text-muted mb-4">Belum ada produk di keranjang Anda</p>
+                        <a href="{{ route('home') }}" class="btn btn-primary">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Mulai Belanja
+                        </a>
+                    </div>
+                @endif
+            </div>
         </div>
+    </div>
 
-        <!-- Area untuk total keseluruhan -->
-        <div class="card mt-4">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-8">
-                        <h5>Subtotal: <span id="subtotal-keseluruhan">Rp. 0</span></h5>
-                        <h4>Total Pembayaran: <span id="grandtotal">Rp. 0</span></h4>
-                        <input type="hidden" id="totalpembayaran" value="0">
-                        <input type="hidden" id="ongkir" value="0">
-                        <input type="hidden" id="layanan" value="0">
+    {{-- Modal Login untuk Checkout - Hanya untuk Guest --}}
+    @guest
+        <div class="modal fade" id="checkoutLoginModal" tabindex="-1" aria-labelledby="checkoutLoginModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header border-0">
+                        <h5 class="modal-title" id="checkoutLoginModalLabel">
+                            <i class="fas fa-credit-card text-primary me-2"></i>
+                            Login untuk Checkout
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="col-md-4">
-                        <a href="{{ route('checkout') }}" class="btn btn-success btn-lg w-100">
-                            <i class="fas fa-shopping-cart me-2"></i>Checkout Semua
+                    <div class="modal-body text-center py-4">
+                        <i class="fas fa-user-lock fa-3x text-muted mb-3"></i>
+                        <p class="mb-3">Untuk melanjutkan ke checkout dan menyelesaikan pesanan, Anda perlu login terlebih
+                            dahulu.</p>
+                        <div class="alert alert-info">
+                            <small><i class="fas fa-info-circle me-1"></i>
+                                Jangan khawatir, barang di keranjang tidak akan hilang setelah login!</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 justify-content-center">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nanti Saja</button>
+                        <a href="{{ route('login') }}" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt me-1"></i>
+                            Login Sekarang
                         </a>
                     </div>
                 </div>
             </div>
         </div>
-    @endif
-    <script>
-        // JavaScript khusus untuk cart (inline untuk memastikan dijalankan)
-        $(document).ready(function() {
-            console.log('Cart page loaded');
 
-            // Function untuk format Rupiah
-            function formatRupiah(angka) {
-                return 'Rp. ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        <script>
+            function showCheckoutLoginModal() {
+                var checkoutModal = new bootstrap.Modal(document.getElementById('checkoutLoginModal'));
+                checkoutModal.show();
             }
-
-            // Function untuk mengambil nilai numeric
-            function getNumericValue(value) {
-                if (typeof value === 'string') {
-                    let cleanValue = value.replace(/[^0-9]/g, '');
-                    return parseInt(cleanValue) || 0;
-                }
-                return parseInt(value) || 0;
-            }
-
-            // Function untuk menghitung total per item
-            function hitungTotalPerItem(cartItem) {
-                const hargaInput = cartItem.find('input[name="harga"]');
-                const qtyInput = cartItem.find('input[name="stok"]');
-                const totalInput = cartItem.find('input[name="total"]');
-
-                const harga = getNumericValue(hargaInput.val());
-                const qty = parseInt(qtyInput.val()) || 1;
-                const total = harga * qty;
-
-                totalInput.val(formatRupiah(total));
-                return total;
-            }
-
-            // Function untuk menghitung subtotal keseluruhan
-            function hitungSubtotalKeseluruhan() {
-                let subtotal = 0;
-
-                $('.cart-item').each(function() {
-                    const total = hitungTotalPerItem($(this));
-                    subtotal += total;
-                });
-
-                $('#subtotal-keseluruhan').text(formatRupiah(subtotal));
-                $('#grandtotal').text(formatRupiah(subtotal));
-                $('#totalpembayaran').val(subtotal);
-
-                return subtotal;
-            }
-
-            // Event handlers
-        //     $(document).on('click', '.plus', function(e) {
-        //         e.preventDefault();
-        //         const cartItem = $(this).closest('.cart-item');
-        //         const qtyInput = cartItem.find('input[name="stok"]');
-        //         let qty = parseInt(qtyInput.val()) || 1;
-        //         if (qty < 999) {
-        //             qtyInput.val(qty + 1);
-        //             hitungSubtotalKeseluruhan();
-        //         }
-        //     });
-
-        //     $(document).on('click', '.minus', function(e) {
-        //         e.preventDefault();
-        //         const cartItem = $(this).closest('.cart-item');
-        //         const qtyInput = cartItem.find('input[name="stok"]');
-        //         let qty = parseInt(qtyInput.val()) || 1;
-        //         if (qty > 1) {
-        //             qtyInput.val(qty - 1);
-        //             hitungSubtotalKeseluruhan();
-        //         }
-        //     });
-
-        //     // Inisialisasi
-        //     hitungSubtotalKeseluruhan();
-        // });
-    </script>
+        </script>
+    @endguest
 @endsection

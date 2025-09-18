@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Services\UserService;
+use Illuminate\Support\Facades\Session;
 
 class AuthController extends Controller
 {
@@ -27,15 +28,16 @@ class AuthController extends Controller
             ->withErrors(['email' => $result['message']])
             ->onlyInput('email');
         }
+        
+        if (Session::has('checkout_redirect')) {
+            Session::forget('checkout_redirect');
+            return redirect()->route('checkout')->with('Success', 'Login berhasil! Silahkan lanjutkan checkout.');
+        }
 
         return redirect()
         ->intended('/')
         ->with('success', $result['message']);
     }
-
-
-
-
 
     public function showregister()
     {
@@ -43,6 +45,7 @@ class AuthController extends Controller
             'title' => 'Register'
                 ]);
     }
+
     public function register(RegisterRequest $request)
     {
         $result = $this->userService->handleRegister($request);
@@ -53,6 +56,10 @@ class AuthController extends Controller
             ->withInput($request->except('password','password_confirmation'));
         }
 
+        if (Session::has('checkot_redirect')) {
+            Session::forget('checkout_redirect');
+            return redirect()->route('checkout')->with('Success' , 'Registrasi berhasil! Silahkan lanjutkan checkout.');
+        }
         return redirect()
         ->route('login')
         ->with('success',$result['message']);
