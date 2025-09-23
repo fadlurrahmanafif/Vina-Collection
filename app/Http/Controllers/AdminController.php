@@ -240,10 +240,7 @@ class AdminController extends Controller
 
     public function loginAdmin(LoginRequest $request)
     {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+        $credentials = $request->validated();
 
         if (Auth::guard('admin')->attempt($credentials)) {
             $request->session()->regenerate();

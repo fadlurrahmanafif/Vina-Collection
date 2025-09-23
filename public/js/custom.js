@@ -1,12 +1,12 @@
 $(document).ready(function () {
-    console.log('Custom.js loaded - Final Fix Version');
+    console.log('Custom.js loaded - Fixed Total Calculation Version');
 
     // Function untuk format Rupiah
     function formatRupiah(angka) {
-        return 'Rp. ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        return 'Rp ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
 
-    // Function untuk mengambil nilai numeric - DIPERBAIKI
+    // Function untuk mengambil nilai numeric
     function getNumericValue(value) {
         if (typeof value === 'string') {
             let cleanValue = value.replace(/[^0-9]/g, '');
@@ -20,14 +20,22 @@ $(document).ready(function () {
         const hargaInput = cartItem.find('input[name="harga"]');
         const qtyInput = cartItem.find('input[name="stok"]');
         const totalInput = cartItem.find('input[name="total"]');
+        const totalDisplay = cartItem.find('.total-text'); // Elemen yang menampilkan total
 
-        // PENTING: Ambil harga mentah (angka asli tanpa format)
-        const harga = parseInt(hargaInput.val()) || 0; // Jangan gunakan getNumericValue untuk harga
+        // Ambil harga mentah (angka asli tanpa format)
+        const harga = parseInt(hargaInput.val()) || 0;
         const qty = parseInt(qtyInput.val()) || 1;
         const total = harga * qty;
 
-        // Update field total dengan format Rupiah
-        totalInput.val(formatRupiah(total));
+        // Update field total dengan format Rupiah untuk tampilan
+        if (totalDisplay.length > 0) {
+            totalDisplay.text(formatRupiah(total));
+        }
+
+        // Update hidden input total dengan angka murni
+        if (totalInput.length > 0) {
+            totalInput.val(total);
+        }
 
         console.log('Item calculation:', {
             harga: harga,
@@ -49,9 +57,15 @@ $(document).ready(function () {
         });
 
         // Update tampilan subtotal dan grand total
-        $('#subtotal-keseluruhan').text(formatRupiah(subtotalKeseluruhan));
-        $('#grandtotal').text(formatRupiah(subtotalKeseluruhan));
-        $('#totalpembayaran').val(subtotalKeseluruhan);
+        if ($('#subtotal-keseluruhan').length > 0) {
+            $('#subtotal-keseluruhan').text(formatRupiah(subtotalKeseluruhan));
+        }
+        if ($('#grandtotal').length > 0) {
+            $('#grandtotal').text(formatRupiah(subtotalKeseluruhan));
+        }
+        if ($('#totalpembayaran').length > 0) {
+            $('#totalpembayaran').val(subtotalKeseluruhan);
+        }
 
         console.log('Subtotal keseluruhan:', subtotalKeseluruhan);
         return subtotalKeseluruhan;
@@ -61,61 +75,50 @@ $(document).ready(function () {
     $(document).on('click', '.plus', function (e) {
         e.preventDefault();
         e.stopPropagation();
-        e.stopImmediatePropagation(); // Mencegah double-click
+
+        console.log('Plus button clicked');
 
         const cartItem = $(this).closest('.cart-item');
         const qtyInput = cartItem.find('input[name="stok"]');
         let currentQty = parseInt(qtyInput.val()) || 1;
-
-        console.log('Plus clicked - Current qty:', currentQty);
 
         if (currentQty < 999) {
             const newQty = currentQty + 1;
             qtyInput.val(newQty);
             console.log('Plus - New qty:', newQty);
 
-            // Delay sedikit untuk memastikan DOM ter-update
-            setTimeout(function () {
-                hitungSubtotalKeseluruhan();
-            }, 50);
+            // Langsung hitung ulang total
+            hitungSubtotalKeseluruhan();
         }
 
-        return false; // Mencegah form submission
+        return false;
     });
 
     // Event handler untuk tombol MINUS - DIPERBAIKI
     $(document).on('click', '.minus', function (e) {
         e.preventDefault();
         e.stopPropagation();
-        e.stopImmediatePropagation(); // Mencegah double-click
+
+        console.log('Minus button clicked');
 
         const cartItem = $(this).closest('.cart-item');
         const qtyInput = cartItem.find('input[name="stok"]');
         let currentQty = parseInt(qtyInput.val()) || 1;
-
-        console.log('Minus clicked - Current qty:', currentQty);
 
         if (currentQty > 1) {
             const newQty = currentQty - 1;
             qtyInput.val(newQty);
             console.log('Minus - New qty:', newQty);
 
-            // Delay sedikit untuk memastikan DOM ter-update
-            setTimeout(function () {
-                hitungSubtotalKeseluruhan();
-            }, 50);
+            // Langsung hitung ulang total
+            hitungSubtotalKeseluruhan();
         }
 
-        return false; // Mencegah form submission
+        return false;
     });
 
     // Event handler untuk perubahan quantity secara manual
     $(document).on('input change', 'input[name="stok"]', function (e) {
-        // Jangan jalankan jika dipicu oleh tombol plus/minus
-        if (e.originalEvent && e.originalEvent.isTrusted === false) {
-            return;
-        }
-
         let qty = parseInt($(this).val()) || 1;
         if (qty < 1) qty = 1;
         if (qty > 999) qty = 999;
@@ -151,11 +154,18 @@ $(document).ready(function () {
         $('.cart-item').each(function (index) {
             const harga = $(this).find('input[name="harga"]').val();
             const stok = $(this).find('input[name="stok"]').val();
+            const hasPlus = $(this).find('.plus').length;
+            const hasMinus = $(this).find('.minus').length;
+            const hasTotalText = $(this).find('.total-text').length;
+
             console.log(`Item ${index + 1}:`, {
                 harga: harga,
                 stok: stok,
                 hargaType: typeof harga,
-                stokType: typeof stok
+                stokType: typeof stok,
+                hasPlus: hasPlus,
+                hasMinus: hasMinus,
+                hasTotalText: hasTotalText
             });
         });
 
@@ -181,7 +191,7 @@ $(document).ready(function () {
     // Debug: Log semua cart items
     console.log('Total cart items found:', $('.cart-item').length);
 
-    // TAMBAHAN: Function untuk checkout (jika digunakan di halaman checkout)
+    // CHECKOUT FUNCTIONS - untuk halaman checkout
     function hitungTotalKeseluruhan() {
         let subtotalKeseluruhan = getNumericValue($('#subtotal').val()) || 0;
         let ongkir = getNumericValue($('#ongkir').val()) || 0;
@@ -252,47 +262,3 @@ $(document).ready(function () {
     // Jalankan inisialisasi checkout
     initializeCheckout();
 });
-
-// // Tambahkan di custom.js yang sudah ada
-// $(document).on('change', '#ekspedisi', function () {
-//     let ekspedisi = $(this).val();
-//     let ongkir = 0;
-
-//     switch (ekspedisi) {
-//         case 'jnt': ongkir = 15000; break;
-//         case 'jne': ongkir = 20000; break;
-//         case 'pos': ongkir = 12000; break;
-//         case 'sicepat': ongkir = 18000; break;
-//         default: ongkir = 0;
-//     }
-
-//     $('#ongkir').val('Rp. ' + ongkir.toLocaleString('id-ID'));
-//     hitungTotalKeseluruhan();
-// });
-
-// $(document).on('change', '#metode', function () {
-//     let metode = $(this).val();
-//     let biayaLayanan = 0;
-
-//     switch (metode) {
-//         case 'cod': biayaLayanan = 1000; break;
-//         case 'dana': biayaLayanan = 1500; break;
-//         case 'gopay': biayaLayanan = 1000; break;
-//         case 'transfer': biayaLayanan = 0; break;
-//         default: biayaLayanan = 0;
-//     }
-
-//     $('#layanan').val('Rp. ' + biayaLayanan.toLocaleString('id-ID'));
-//     hitungTotalKeseluruhan();
-// });
-
-// // Function untuk hitung total checkout
-// function hitungTotalKeseluruhan() {
-//     let subtotal = getNumericValue($('#subtotal').val()) || 0;
-//     let ongkir = getNumericValue($('#ongkir').val()) || 0;
-//     let layanan = getNumericValue($('#layanan').val()) || 0;
-//     let grandTotal = subtotal + ongkir + layanan;
-
-//     $('#totalpembayaran').val('Rp. ' + grandTotal.toLocaleString('id-ID'));
-//     return grandTotal;
-// }

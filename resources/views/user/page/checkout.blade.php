@@ -1,9 +1,15 @@
 @extends('user.layout.master')
 <link rel="stylesheet" href="{{ asset('css/user/checkout.css') }}">
+<!-- Tambahkan Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
 @section('content')
     <div class="container-fluid checkout-container">
-        <form action="{{ route('proses.pembayaran') }}" method="POST">
+        <form action="{{ route('proses.pembayaran') }}" method="POST" id="checkoutForm">
             @csrf
+            <!-- Hidden fields untuk koordinat -->
+            <input type="hidden" name="latitude" id="latitude" value="">
+            <input type="hidden" name="longitude" id="longitude" value="">
 
             <div class="row mt-5">
 
@@ -22,12 +28,60 @@
                                 </div>
                             </div>
 
+                            <!-- Alamat Section dengan Map -->
                             <div class="row mb-3">
                                 <label for="alamat_anda" class="col-form-label col-lg-3 col-md-4 col-sm-12">Alamat
                                     Anda</label>
                                 <div class="col-lg-9 col-md-8 col-sm-12">
-                                    <input type="text" class="form-control" id="alamat_anda" name="alamatAnda"
-                                        placeholder="Masukkan Alamat Anda" required>
+                                    <div class="address-input-group">
+                                        <div class="input-group mb-2">
+                                            <input type="text" class="form-control" id="alamat_anda" name="alamatAnda"
+                                                placeholder="Ketik alamat lengkap atau gunakan lokasi saat ini" required>
+                                            <button class="btn btn-outline-secondary" type="button" id="searchAddressBtn">
+                                                <i class="fas fa-search"></i>
+                                            </button>
+                                        </div>
+
+                                        <!-- Address suggestions -->
+                                        <div id="addressSuggestions" class="address-suggestions" style="display: none;">
+                                        </div>
+
+                                        <!-- Map controls -->
+                                        <div class="map-controls mb-2">
+                                            <button type="button" class="btn btn-sm btn-primary"
+                                                id="getCurrentLocationBtn">
+                                                <i class="fas fa-crosshairs me-1"></i>Lokasi Saat Ini
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-secondary" id="clearMapBtn">
+                                                <i class="fas fa-eraser me-1"></i>Bersihkan
+                                            </button>
+                                        </div>
+
+                                        <!-- Loading spinner -->
+                                        <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+                                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                            <small class="ms-2">Mencari lokasi...</small>
+                                        </div>
+
+                                        <!-- Map container -->
+                                        <div id="map" class="map-container"></div>
+
+                                        <!-- Location info -->
+                                        <div id="locationInfo" class="location-info mt-2" style="display: none;">
+                                            <div class="row">
+                                                <div class="col-md-6 col-sm-12">
+                                                    <small class="text-muted">Koordinat:</small>
+                                                    <div id="coordinates" class="fw-bold small"></div>
+                                                </div>
+                                                <div class="col-md-6 col-sm-12">
+                                                    <small class="text-muted">Alamat Terdeteksi:</small>
+                                                    <div id="detectedAddress" class="fw-bold small"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -45,10 +99,10 @@
                                 <div class="col-lg-9 col-md-8 col-sm-12">
                                     <select name="ekspedisi" id="ekspedisi" class="form-control" required>
                                         <option value="">-- Pilih Ekspedisi --</option>
-                                        <option value="jnt">J&T Express (Rp. 15.000)</option>
-                                        <option value="jne">JNE Express (Rp. 20.000)</option>
-                                        <option value="pos">Pos Indonesia (Rp. 12.000)</option>
-                                        <option value="sicepat">SiCepat (Rp. 18.000)</option>
+                                        <option value="jnt" data-cost="15000">J&T Express (Rp. 15.000)</option>
+                                        <option value="jne" data-cost="20000">JNE Express (Rp. 20.000)</option>
+                                        <option value="pos" data-cost="12000">Pos Indonesia (Rp. 12.000)</option>
+                                        <option value="sicepat" data-cost="18000">SiCepat (Rp. 18.000)</option>
                                     </select>
                                 </div>
                             </div>
@@ -81,16 +135,16 @@
                                 <label for="subtotal" class="col-form-label col-lg-5 col-md-6 col-sm-12">Subtotal
                                     Pesanan</label>
                                 <div class="col-lg-7 col-md-6 col-sm-12">
-                                    <input type="text" class="form-control bg-transparent" id="subtotal" name="subtotal"
-                                        readonly value="Rp.{{ $detailBelanja }}">
+                                    <input type="text" class="form-control bg-transparent" id="subtotal"
+                                        name="subtotal" readonly value="Rp.{{ $detailBelanja }}">
                                 </div>
                             </div>
 
                             <div class="row mb-3">
                                 <label for="ongkir" class="col-form-label col-lg-5 col-md-6 col-sm-12">Ongkir</label>
                                 <div class="col-lg-7 col-md-6 col-sm-12">
-                                    <input type="text" class="form-control bg-transparent" id="ongkir" name="ongkir"
-                                        readonly value="Rp. 0">
+                                    <input type="text" class="form-control bg-transparent" id="ongkir"
+                                        name="ongkir" readonly value="Rp. 0">
                                 </div>
                             </div>
 
@@ -98,8 +152,8 @@
                                 <label for="layanan" class="col-form-label col-lg-5 col-md-6 col-sm-12">Biaya
                                     Layanan</label>
                                 <div class="col-lg-7 col-md-6 col-sm-12">
-                                    <input type="text" class="form-control bg-transparent" id="layanan" name="layanan"
-                                        readonly value="Rp. 0">
+                                    <input type="text" class="form-control bg-transparent" id="layanan"
+                                        name="layanan" readonly value="Rp. 0">
                                 </div>
                             </div>
 
@@ -110,8 +164,9 @@
                                     <strong>Total Pembayaran</strong>
                                 </label>
                                 <div class="col-lg-7 col-md-6 col-sm-12">
-                                    <input type="text" class="form-control bg-transparent fw-bold" id="totalpembayaran"
-                                        name="totalpembayaran" readonly value="Rp. " style="font-size: 1.1em;">
+                                    <input type="text" class="form-control bg-transparent fw-bold"
+                                        id="totalpembayaran" name="totalpembayaran" readonly
+                                        value="Rp.{{ $detailBelanja }}" style="font-size: 1.1em;">
                                 </div>
                             </div>
 
@@ -126,9 +181,7 @@
             </div>
         </form>
 
-
-        <!-- Product Cart Items Display Section -->
-        <!-- Product Cart Items Display Section -->
+        <!-- Product Cart Items Display Section tetap sama -->
         @if (isset($cartItems) && count($cartItems) > 0)
             <div class="row mt-4">
                 <div class="col-12">
@@ -162,14 +215,12 @@
                                     </div>
                                     <div class="col-md-2 col-4">
                                         <small class="text-muted d-block">Subtotal</small>
-                                        <!-- PERBAIKAN: Gunakan harga yang tersimpan di cart (sudah total) -->
                                         <span class="fw-bold text-primary">Rp.
                                             {{ number_format($item->harga, 0, ',', '.') }}</span>
                                     </div>
                                 </div>
                             @endforeach
 
-                            <!-- Summary Row -->
                             <div class="row mt-3 pt-3 border-top">
                                 <div class="col-md-8 col-6">
                                     <h6 class="mb-0">Total Item: <strong>{{ count($cartItems) }} produk</strong></h6>
@@ -184,7 +235,6 @@
                 </div>
             </div>
         @else
-            <!-- Tampilkan pesan ketika belum ada item yang di-checkout -->
             <div class="row mt-4">
                 <div class="col-12">
                     <div class="card">
@@ -206,7 +256,7 @@
             </div>
         @endif
 
-        <!-- Debug Script untuk memastikan data terkirim -->
+        <!-- Debug Script -->
         <script>
             console.log('=== DEBUG CHECKOUT ===');
             console.log('Cart items count:', {{ count($cartItems ?? []) }});
@@ -226,22 +276,18 @@
             @else
                 console.log('Tidak ada data cart dengan status = 1');
             @endif
+
+            // Pass subtotal to JavaScript
+            window.checkoutData = {
+                subtotal: {{ $detailBelanja }},
+                cartCount: {{ count($cartItems ?? []) }}
+            };
         </script>
-        {{-- </form> --}}
     </div>
 
-    <!-- Include custom JavaScript -->
+    <!-- Include Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Include your custom JavaScript -->
+    <script src="{{ asset('js/peta.js') }}"></script>
     <script src="{{ asset('js/custom.js') }}"></script>
-
-    <!-- Additional inline script for debugging -->
-    <script>
-        // Debug - tampilkan data user di console
-        console.log('User data:', {
-            nama: '{{ $user ? $user->nama : 'tidak ada' }}',
-            no_hp: '{{ $user ? $user->no_hp : 'tidak ada' }}'
-        });
-
-        console.log('Detail belanja:', '{{ $detailBelanja }}');
-        console.log('Cart items count:', '{{ count($cartItems ?? []) }}');
-    </script>
 @endsection

@@ -100,37 +100,28 @@
                 <h4 class="mb-2 mb-md-3 fw-bold">Best Seller</h4>
                 @foreach ($best as $b)
                     <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-                        <div class="card product-card border-0 shadow-sm h-100">
-                            <div class="position-relative overflow-hidden">
-                                <img src="{{ asset('storage/produk/' . $b->foto) }}" class="card-img-top" alt="New Product"
-                                    loading="lazy">
-                                <!-- New Badge -->
-                                <span class="badge bg-success position-absolute top-0 start-0 m-2">Best</span>
-                            </div>
-                            <div class="card-body p-2 p-sm-3">
-                                <h6 class="card-title mb-1 text-truncate">{{ $b->nama_produk }}</h6>
-                                <div class="d-flex align-items-center mb-2">
-                                    <div class="stars-rating me-2">
-                                        <i class="fa fa-star text-warning"></i>
-                                    </div>
-                                    <small class="text-muted">5+</small>
+                        <a href="{{ route('detail', $b->id) }}" class="product-link">
+                            <div class="card product-card border-0 shadow-sm h-100">
+                                <div class="position-relative overflow-hidden">
+                                    <img src="{{ asset('storage/produk/' . $b->foto) }}" class="card-img-top"
+                                        alt="New Product" loading="lazy">
+                                    <!-- New Badge -->
+                                    <span class="badge bg-success position-absolute top-0 start-0 m-2">Best</span>
                                 </div>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="price-container">
-                                        <span class="fw-bold text-primary price-text">Rp.
-                                            {{ number_format($b->harga) }}</span>
+                                <div class="card-body p-2 p-sm-3">
+                                    <h6 class="card-title mb-1 text-truncate">{{ $b->nama_produk }}</h6>
+                                    <div class="d-flex align-items-center mb-2">
+                                        <small class="text-muted">• {{ $b->stok }} Terjual</small>
                                     </div>
-                                    {{-- Tombol add to cart selalu bisa diklik, tidak peduli login atau tidak --}}
-                                    <form action="{{ route('add.to.cart', $b->id) }}" method="POST">
-                                        @csrf
-                                        <input type="hidden" name="idProduct" value="{{ $b->id }}">
-                                        <button type="submit" class="btn btn-outline-dark btn-sm cart-btn">
-                                            <i class="fa-solid fa-cart-plus"></i>
-                                        </button>
-                                    </form>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="price-container">
+                                            <span class="fw-bold text-primary price-text">Rp.
+                                                {{ number_format($b->harga) }}</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                 @endforeach
             </div>
@@ -161,41 +152,28 @@
             @else
                 @foreach (request()->hasAny(['search', 'min_price', 'max_price', 'stok']) ? $products : $newProduct as $p)
                     <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-                        <div class="card product-card border-0 shadow-sm h-100">
-                            <div class="position-relative overflow-hidden">
-                                <img src="{{ asset('storage/produk/' . $p->foto) }}" class="card-img-top"
-                                    alt="{{ $p->nama_produk }}" loading="lazy">
-                                <!-- Badge berdasarkan kondisi -->
-                                @if (request()->hasAny(['search', 'min_price', 'max_price', 'stok']))
-                                    <span class="badge bg-info position-absolute top-0 start-0 m-2">Found</span>
-                                @else
-                                    <span class="badge bg-success position-absolute top-0 start-0 m-2">New</span>
-                                @endif
-                            </div>
-                            <div class="card-body p-2 p-sm-3">
-                                <h6 class="card-title mb-1 text-truncate">{{ $p->nama_produk }}</h6>
-                                <div class="d-flex align-items-center mb-2">
-                                    <div class="stars-rating me-2">
-                                        <i class="fa fa-star text-warning"></i>
-                                    </div>
-                                    <small class="text-muted">5+</small>
+                        <a href="{{ route('detail', $p->id) }}" class="product-link">
+                            <div class="card product-card border-0 shadow-sm h-100">
+                                <div class="position-relative overflow-hidden">
+                                    <img src="{{ asset('storage/produk/' . $p->foto) }}" class="card-img-top"
+                                        alt="{{ $p->nama_produk }}" loading="lazy">
+                                    @if (request()->hasAny(['search', 'min_price', 'max_price', 'stok']))
+                                        <span class="badge bg-info position-absolute top-0 start-0 m-2">Found</span>
+                                    @else
+                                        <span class="badge bg-success position-absolute top-0 start-0 m-2">New</span>
+                                    @endif
                                 </div>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="price-container">
-                                        <span class="fw-bold text-primary price-text">
-                                            Rp. {{ number_format($p->harga) }}
-                                        </span>
+                                <div class="card-body p-2 p-sm-3">
+                                    <h6 class="card-title mb-1 text-truncate">{{ $p->nama_produk }}</h6>
+                                    <div class="d-flex align-items-center mb-2">
+                                        <small class="text-muted">• {{ $p->stok }} Terjual</small>
                                     </div>
-                                    <form action="{{ route('add.to.cart', $p->id) }}" method="POST">
-                                        @csrf
-                                        <input type="hidden" name="idProduct" value="{{ $p->id }}">
-                                        <button type="submit" class="btn btn-outline-dark btn-sm cart-btn">
-                                            <i class="fa-solid fa-cart-plus"></i>
-                                        </button>
-                                    </form>
+                                    <div class="fw-bold text-primary">
+                                        Rp. {{ number_format($p->harga) }}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                 @endforeach
             @endif

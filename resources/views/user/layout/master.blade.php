@@ -24,7 +24,7 @@
 </head>
 
 <body>
-    @if (Request::routeIs('home', 'keranjang', 'status.pesanan','checkout'))
+    @if (Request::routeIs('home', 'keranjang', 'status.pesanan','checkout', 'detail'))
         @include('user.components.navbar')
     @endif
 
@@ -32,7 +32,7 @@
         @yield('content')
     </div>
 
-    @if (Request::routeIs('home'))
+    @if (Request::routeIs('home', 'detail'))
         @include('user.components.footer')
     @endif
 

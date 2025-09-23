@@ -63,8 +63,15 @@ body {
 .product-card {
     transition: all 0.3s ease;
     border-radius: 12px;
-    overflow: hidden;
     background: white;
+}
+
+.product-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    height: 100%;
 }
 
 .product-card .card-img-top {

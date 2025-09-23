@@ -29,12 +29,12 @@
                                     @if (isset($is_guest) && $is_guest)
                                         {{-- GUEST USER - Data dari Session --}}
                                         @foreach ($data as $productId => $item)
-                                            <div class="row align-items-center py-3 border-bottom">
+                                            <div class="row align-items-center py-3 border-bottom cart-item">
                                                 <div class="col-md-2">
                                                     <img src="{{ asset('storage/produk/' . $item['foto']) }}"
                                                         class="img-fluid rounded" alt="Product" style="max-height: 80px;">
                                                 </div>
-                                                <div class="col-md-4">
+                                                <div class="col-md-3">
                                                     <h6 class="mb-1">{{ $item['nama_produk'] }}</h6>
                                                     <small class="text-muted">Produk</small>
                                                 </div>
@@ -44,14 +44,29 @@
                                                     <br>
                                                     <small class="text-muted">per item</small>
                                                 </div>
-                                                <div class="col-md-2">
-                                                    <div class="input-group input-group-sm">
-                                                        <span class="input-group-text">Qty:</span>
-                                                        <input type="text" class="form-control text-center"
-                                                            value="{{ $item['quantity'] }}" readonly>
+                                                <div class="col-md-3">
+                                                    <div class="d-flex align-items-center mb-2">
+                                                        <button class="btn btn-outline-secondary btn-sm minus me-1"
+                                                            type="button">
+                                                            <i class="fas fa-minus"></i>
+                                                        </button>
+                                                        <input type="number"
+                                                            class="form-control form-control-sm text-center mx-1"
+                                                            name="stok" value="{{ $item['stok'] }}" min="1"
+                                                            style="width: 60px;">
+                                                        <button class="btn btn-outline-secondary btn-sm plus ms-1"
+                                                            type="button">
+                                                            <i class="fas fa-plus"></i>
+                                                        </button>
                                                     </div>
-                                                    <small class="text-primary">Total: Rp
-                                                        {{ number_format($item['total_harga']) }}</small>
+                                                    {{-- Hidden input untuk harga (angka mentah) --}}
+                                                    <input type="hidden" name="harga"
+                                                        value="{{ $item['harga_satuan'] }}">
+                                                    <input type="hidden" name="total" value="{{ $item['total_harga'] }}">
+                                                    <small class="text-primary fw-bold total-display">
+                                                        Total: <span class="total-text">Rp
+                                                            {{ number_format($item['total_harga']) }}</span>
+                                                    </small>
                                                 </div>
                                                 <div class="col-md-2 text-end">
                                                     <form action="{{ route('delete.cart', $productId) }}" method="POST"
@@ -69,12 +84,12 @@
                                     @else
                                         {{-- USER LOGIN - Data dari Database --}}
                                         @foreach ($data as $item)
-                                            <div class="row align-items-center py-3 border-bottom">
+                                            <div class="row align-items-center py-3 border-bottom cart-item">
                                                 <div class="col-md-2">
                                                     <img src="{{ asset('storage/produk/' . $item->product->foto) }}"
                                                         class="img-fluid rounded" alt="Product" style="max-height: 80px;">
                                                 </div>
-                                                <div class="col-md-4">
+                                                <div class="col-md-3">
                                                     <h6 class="mb-1">{{ $item->product->nama_produk }}</h6>
                                                     <small class="text-muted">Produk</small>
                                                 </div>
@@ -84,14 +99,29 @@
                                                     <br>
                                                     <small class="text-muted">per item</small>
                                                 </div>
-                                                <div class="col-md-2">
-                                                    <div class="input-group input-group-sm">
-                                                        <span class="input-group-text">Qty:</span>
-                                                        <input type="text" class="form-control text-center"
-                                                            value="{{ $item->stok }}" readonly>
+                                                <div class="col-md-3">
+                                                    <div class="d-flex align-items-center mb-2">
+                                                        <button class="btn btn-outline-secondary btn-sm minus me-1"
+                                                            type="button">
+                                                            <i class="fas fa-minus"></i>
+                                                        </button>
+                                                        <input type="number"
+                                                            class="form-control form-control-sm text-center mx-1"
+                                                            name="stok" value="{{ $item->stok }}" min="1"
+                                                            style="width: 60px;">
+                                                        <button class="btn btn-outline-secondary btn-sm plus ms-1"
+                                                            type="button">
+                                                            <i class="fas fa-plus"></i>
+                                                        </button>
                                                     </div>
-                                                    <small class="text-primary">Total: Rp
-                                                        {{ number_format($item->harga) }}</small>
+                                                    {{-- Hidden input untuk harga (angka mentah) --}}
+                                                    <input type="hidden" name="harga"
+                                                        value="{{ $item->product->harga }}">
+                                                    <input type="hidden" name="total" value="{{ $item->harga }}">
+                                                    <small class="text-primary fw-bold total-display">
+                                                        Total: <span class="total-text">Rp
+                                                            {{ number_format($item->harga) }}</span>
+                                                    </small>
                                                 </div>
                                                 <div class="col-md-2 text-end">
                                                     <form action="{{ route('delete.cart', $item->id) }}" method="POST"
@@ -125,32 +155,47 @@
                                         } else {
                                             $subtotal = $data->sum('harga');
                                         }
-                                        $shipping = 15000; // Bisa disesuaikan
-                                        $total = $subtotal + $shipping;
                                     @endphp
 
-                                    <div class="d-flex justify-content-between mb-2">
+                                    <div class="d-flex justify-content-between mb-3">
                                         <span>Subtotal:</span>
-                                        <span class="fw-bold">Rp {{ number_format($subtotal) }}</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span>Estimasi Ongkir:</span>
-                                        <span>Rp {{ number_format($shipping) }}</span>
+                                        <span class="fw-bold" id="subtotal-keseluruhan">Rp
+                                            {{ number_format($subtotal) }}</span>
                                     </div>
                                     <hr>
                                     <div class="d-flex justify-content-between mb-3">
-                                        <strong>Estimasi Total:</strong>
-                                        <strong class="text-primary">Rp {{ number_format($total) }}</strong>
+                                        <strong>Total:</strong>
+                                        <strong class="text-primary" id="grandtotal">Rp
+                                            {{ number_format($subtotal) }}</strong>
                                     </div>
+                                    <input type="hidden" id="totalpembayaran" value="{{ $subtotal }}">
+
+                                    <small class="text-muted d-block mb-3">
+                                        *Ongkir dan biaya layanan akan dihitung di halaman checkout
+                                    </small>
 
                                     @auth
                                         {{-- Jika sudah login, bisa langsung checkout --}}
-                                        <a href="{{ route('checkout') }}" class="btn btn-primary w-100">
-                                            <i class="fas fa-credit-card me-2"></i>
-                                            Lanjut ke Checkout
-                                        </a>
+                                        <form action="{{ route('checkout.proses') }}" method="POST">
+                                            @csrf
+                                            @foreach ($data as $item)
+                                                <input type="hidden" name="items[{{ $item->id }}][id_barang]"
+                                                    value="{{ $item->id_barang }}">
+                                                <input type="hidden" name="items[{{ $item->id }}][stok]"
+                                                    value="{{ $item->stok }}">
+                                                <input type="hidden" name="items[{{ $item->id }}][harga]"
+                                                    value="{{ $item->product->harga }}">
+                                                <input type="hidden" name="items[{{ $item->id }}][total]"
+                                                    value="{{ $item->stok * $item->product->harga }}">
+                                            @endforeach
+
+                                            <button type="submit" class="btn btn-primary w-100">
+                                                <i class="fas fa-credit-card me-2"></i>
+                                                Lanjut ke Checkout
+                                            </button>
+                                        </form>
                                         <small class="text-muted d-block text-center mt-2">
-                                            Ongkir akan dihitung saat checkout
+                                            Ongkir dan metode pembayaran akan dipilih saat checkout
                                         </small>
                                     @else
                                         {{-- Jika belum login, tampilkan tombol yang redirect ke login --}}

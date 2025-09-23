@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\prosesPembayaranRequest;
 use App\Models\Cart;
 use App\Models\DetailTransaksi;
 use App\Models\Product;
@@ -129,6 +130,18 @@ class UserController extends Controller
         ]);
     }
 
+    // detail barang/product
+    public function detail($id)
+    {
+        $product = Product::findOrFail($id);
+        // dd($product);die;
+
+        return view('user.page.detail',[
+            'title' => 'Detail Produk',
+            'product' => $product,
+        ]);
+    }
+
     // cart
     public function addCart(Request $request)
     {
@@ -137,7 +150,7 @@ class UserController extends Controller
 
         if (!$product) {
             Alert::error('Error', 'Produk tidak di temukan');
-            return redirect()->bacl();
+            return redirect()->back();
         }
 
         if ($product->stok <= 0) {
@@ -193,8 +206,8 @@ class UserController extends Controller
     {
         if (Auth::check()) {
             $cartItems = Cart::where('id_user', Auth::id())
-            ->where('id', $id)
-            ->first();
+                ->where('id', $id)
+                ->first();
 
             if ($cartItems) {
                 $cartItems->delete();
@@ -219,13 +232,21 @@ class UserController extends Controller
 
     public function cart()
     {
-
         $countKeranjang = $this->getCartCount();
 
         if (Auth::check()) {
+
+            $guestCart = Session::get('guest_cart', []);
+            if (!empty($guestCart)) {
+                $this->mergeGuestCartTouser();
+
+                $countKeranjang = $this->getCartCount();
+            }
+
             $cartItems = Cart::with('product')
                 ->where('id_user', Auth::id())
                 ->where('status', 0)
+                ->whereHas('product')
                 ->get();
 
             return view('user.page.cart', [
@@ -391,36 +412,47 @@ class UserController extends Controller
     }
 
     // Method checkoutProses() - pastikan ini benar
-    public function checkoutProses(Request $request, $id)
+    public function checkoutProses(Request $request)
     {
         if (!Auth::check()) {
             return redirect()->route('login');
         }
 
-        $data = $request->all();
-        
-        // Bersihkan format harga/total sebelum disimpan
-        $totalBersih = (int) preg_replace('/[^0-9]/', '', $data['total']);
+        $items = $request->input('items', []);
+        $subtotal = 0;
 
+        foreach ($items as $cartId => $item) {
+            $stok  = (int) $item['stok'];
+            $harga = (int) $item['harga'];
+            $total = $stok * $harga;
 
-        // PENTING: Update cart dengan status = 1 (sudah di-checkout)
-        Cart::where('id_user' , Auth::id())
-        ->where('id', $id)
-        ->update([
-            'stok' => $data['stok'],
-            'harga' => $totalBersih,
-            'status' => 1,
-        ]);
+            $subtotal += $total;
 
-        Alert::toast('Berhasil Checkout', 'success');
+            // Update masing-masing cart
+            Cart::where('id', $cartId)
+                ->where('id_user', Auth::id())
+                ->update([
+                    'stok' => $stok,
+                    'harga' => $total,
+                    'status' => 1,
+                ]);
+        }
+
+        // Kalau mau simpan transaksi di tabel orders, bisa lanjut di sini
+        // Order::create([...])
+
+        Alert::toast('Barang Berhasil  di Checkout.' , 'success');
         return redirect()->route('checkout');
     }
 
-    public function prosesPembayaran(Request $request)
+    public function prosesPembayaran(prosesPembayaranRequest $request)
     {
         if (!Auth::check()) {
             return redirect()->route('login');
         }
+        
+        $data = $request->validated();
+
         try {
             $data = $request->all();
 
@@ -440,6 +472,18 @@ class UserController extends Controller
                 Alert::error('Error', 'Tidak ada item untuk diproses');
                 return redirect()->route('keranjang');
             }
+
+            // if (!empty($data['latitude']) && !empty($data['longitude'])) {
+            //     $isValidation = $this->validateCoordinates(
+            //         $data['latitude'],
+            //         $data['longitude'],
+            //         $data['alamatAnda'],
+            //     );
+
+            //     if (!$isValidation) {
+            //         Alert::warning('Peringatan', 'Koordinat tidak sesuai dengan alamat. Pesanan tetap di proses');
+            //     }
+            // }
 
             DB::beginTransaction();
 

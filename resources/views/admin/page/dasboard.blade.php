@@ -94,7 +94,7 @@
                             <i class="material-icons">person_add</i>
                         </div>
                         <div class="activity-content">
-                            <div class="activity-title">New user registered ({{ $recentUser->name }})</div>
+                            <div class="activity-title">New user registered ({{ $recentUser->nama }})</div>
                             <div class="activity-time">{{ $recentUser->created_at->diffForHumans() }}</div>
                         </div>
                     </div>
