@@ -2,7 +2,7 @@
 
 namespace App\Contracts;
 
-interface GuestRepositoryInterface
+interface GuestCartRepositoryInterface
 {
     public function addToGuestCart(int $productId, array $productData): void;
     public function getGuestCart(): array;
