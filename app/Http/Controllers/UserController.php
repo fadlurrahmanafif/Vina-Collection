@@ -136,7 +136,7 @@ class UserController extends Controller
         $product = Product::findOrFail($id);
         // dd($product);die;
 
-        return view('user.page.detail',[
+        return view('user.page.detail', [
             'title' => 'Detail Produk',
             'product' => $product,
         ]);
@@ -384,29 +384,28 @@ class UserController extends Controller
         // Merge session cart ke database jika user baru login
         $this->mergeGuestCartToUser();
 
-        // Ambil data user yang login
         $user = Auth::user();
 
-        // PERBAIKAN: Ambil cart items yang sudah di-checkout (status = 1)
-        // Ini adalah barang yang tadi di-checkout dari halaman cart
+        // Ambil cart items dengan relasi product
         $cartItems = Cart::with('product')
             ->where([
                 'id_user' => Auth::id(),
-                'status' => 1  // Status 1 = sudah di-checkout
+                'status' => 1
             ])
             ->get();
 
-        // Hitung total dari cart items yang sudah di-checkout
-        $detailBelanja = $cartItems->sum('harga');
+        // Hitung total belanja = stok * harga
+        $detailBelanja = $cartItems->sum(function ($item) {
+            return $item->stok * $item->harga;
+        });
 
-        // Count keranjang yang belum di-checkout untuk navbar
         $countKeranjang = $this->getCartCount();
 
         return view('user.page.checkout', [
             'title' => 'Checkout',
             'user' => $user,
             'count' => $countKeranjang,
-            'cartItems' => $cartItems,  // Barang yang sudah di-checkout
+            'cartItems' => $cartItems,
             'detailBelanja' => $detailBelanja,
         ]);
     }
@@ -441,7 +440,7 @@ class UserController extends Controller
         // Kalau mau simpan transaksi di tabel orders, bisa lanjut di sini
         // Order::create([...])
 
-        Alert::toast('Barang Berhasil  di Checkout.' , 'success');
+        Alert::toast('Barang Berhasil  di Checkout.', 'success');
         return redirect()->route('checkout');
     }
 
@@ -450,7 +449,7 @@ class UserController extends Controller
         if (!Auth::check()) {
             return redirect()->route('login');
         }
-        
+
         $data = $request->validated();
 
         try {

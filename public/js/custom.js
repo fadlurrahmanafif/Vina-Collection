@@ -68,7 +68,59 @@ $(document).ready(function () {
         }
 
         console.log('Subtotal keseluruhan:', subtotalKeseluruhan);
+
+        // Update dynamic inputs untuk form checkout
+        updateDynamicCheckoutInputs();
+
         return subtotalKeseluruhan;
+    }
+
+    // Function untuk update dynamic inputs di form checkout - BARU
+    function updateDynamicCheckoutInputs() {
+        const dynamicInputsDiv = $('#dynamic-inputs');
+        if (dynamicInputsDiv.length === 0) return;
+
+        dynamicInputsDiv.empty();
+
+        $('.cart-item').each(function () {
+            const cartItem = $(this);
+            const itemId = cartItem.data('id');
+            const qty = parseInt(cartItem.find('input[name="stok"]').val()) || 1;
+            const harga = parseInt(cartItem.find('input[name="harga"]').val()) || 0;
+            const total = qty * harga;
+
+            // Buat hidden inputs untuk checkout
+            const inputs = `
+                <input type="hidden" name="items[${itemId}][id_barang]" value="${itemId}">
+                <input type="hidden" name="items[${itemId}][stok]" value="${qty}">
+                <input type="hidden" name="items[${itemId}][harga]" value="${harga}">
+                <input type="hidden" name="items[${itemId}][total]" value="${total}">
+            `;
+
+            dynamicInputsDiv.append(inputs);
+        });
+
+        console.log('Dynamic checkout inputs updated');
+    }
+
+    function updateCartQty(cartItem) {
+        const idBarang = cartItem.data('id');
+        const qty = parseInt(cartItem.find('input[name="stok"]').val()) || 1;
+
+        $.ajax({
+            url: `/cart/update/${idBarang}`,
+            type: "PUT",
+            data: {
+                _token: $('meta[name="csrf-token"]').attr('content'),
+                stok: qty
+            },
+            success: function (res) {
+                console.log("Cart updated:", res);
+            },
+            error: function (xhr) {
+                console.error("Cart update failed:", xhr.responseText);
+            }
+        });
     }
 
     // Event handler untuk tombol PLUS - DIPERBAIKI
@@ -89,6 +141,8 @@ $(document).ready(function () {
 
             // Langsung hitung ulang total
             hitungSubtotalKeseluruhan();
+
+            updateCartQty(cartItem);
         }
 
         return false;
@@ -112,6 +166,8 @@ $(document).ready(function () {
 
             // Langsung hitung ulang total
             hitungSubtotalKeseluruhan();
+
+            updateCartQty(cartItem);
         }
 
         return false;
@@ -126,23 +182,41 @@ $(document).ready(function () {
 
         console.log('Manual qty change:', qty);
         hitungSubtotalKeseluruhan();
+
+        updateCartQty($(this).closest('.cart-item'));
     });
 
-    // Event handler untuk form submission checkout individual
+    // Event handler untuk form submission checkout - DIPERBAIKI
+    $(document).on('submit', '#checkout-form', function (e) {
+        console.log('Checkout form submitting...');
+
+        // Pastikan semua data sudah terupdate
+        updateDynamicCheckoutInputs();
+
+        // Log data yang akan dikirim
+        const formData = $(this).serializeArray();
+        console.log('Form data being sent:', formData);
+
+        return true; // Lanjutkan submit
+    });
+
+    // Event handler untuk form submission checkout individual (jika ada)
     $('form[action*="checkout.proses"]').on('submit', function (e) {
         const cartItem = $(this).closest('.cart-item');
-        const harga = parseInt(cartItem.find('input[name="harga"]').val()) || 0;
-        const stok = parseInt(cartItem.find('input[name="stok"]').val()) || 1;
-        const total = harga * stok;
+        if (cartItem.length > 0) {
+            const harga = parseInt(cartItem.find('input[name="harga"]').val()) || 0;
+            const stok = parseInt(cartItem.find('input[name="stok"]').val()) || 1;
+            const total = harga * stok;
 
-        // Update hidden input total dengan angka murni (tanpa format)
-        cartItem.find('input[name="total"]').val(total);
+            // Update hidden input total dengan angka murni (tanpa format)
+            cartItem.find('input[name="total"]').val(total);
 
-        console.log('Form submitted:', {
-            harga: harga,
-            stok: stok,
-            total: total
-        });
+            console.log('Individual form submitted:', {
+                harga: harga,
+                stok: stok,
+                total: total
+            });
+        }
     });
 
     // Inisialisasi saat halaman dimuat

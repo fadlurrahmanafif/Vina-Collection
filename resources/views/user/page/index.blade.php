@@ -111,7 +111,7 @@
                                 <div class="card-body p-2 p-sm-3">
                                     <h6 class="card-title mb-1 text-truncate">{{ $b->nama_produk }}</h6>
                                     <div class="d-flex align-items-center mb-2">
-                                        <small class="text-muted">• {{ $b->stok }} Terjual</small>
+                                        <small class="text-muted">• {{ $b->stok_out }} Terjual</small>
                                     </div>
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div class="price-container">
@@ -166,7 +166,7 @@
                                 <div class="card-body p-2 p-sm-3">
                                     <h6 class="card-title mb-1 text-truncate">{{ $p->nama_produk }}</h6>
                                     <div class="d-flex align-items-center mb-2">
-                                        <small class="text-muted">• {{ $p->stok }} Terjual</small>
+                                        <small class="text-muted">• {{ $p->stok_out }} Terjual</small>
                                     </div>
                                     <div class="fw-bold text-primary">
                                         Rp. {{ number_format($p->harga) }}

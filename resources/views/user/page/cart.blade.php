@@ -29,7 +29,8 @@
                                     @if (isset($is_guest) && $is_guest)
                                         {{-- GUEST USER - Data dari Session --}}
                                         @foreach ($data as $productId => $item)
-                                            <div class="row align-items-center py-3 border-bottom cart-item">
+                                            <div class="row align-items-center py-3 border-bottom cart-item"
+                                                data-id="{{ $item['id_barang'] }}">
                                                 <div class="col-md-2">
                                                     <img src="{{ asset('storage/produk/' . $item['foto']) }}"
                                                         class="img-fluid rounded" alt="Product" style="max-height: 80px;">
@@ -40,8 +41,7 @@
                                                 </div>
                                                 <div class="col-md-2">
                                                     <span class="fw-bold">Rp
-                                                        {{ number_format($item['harga_satuan']) }}</span>
-                                                    <br>
+                                                        {{ number_format($item['harga_satuan']) }}</span><br>
                                                     <small class="text-muted">per item</small>
                                                 </div>
                                                 <div class="col-md-3">
@@ -84,7 +84,8 @@
                                     @else
                                         {{-- USER LOGIN - Data dari Database --}}
                                         @foreach ($data as $item)
-                                            <div class="row align-items-center py-3 border-bottom cart-item">
+                                            <div class="row align-items-center py-3 border-bottom cart-item"
+                                                data-id="{{ $item->id }}">
                                                 <div class="col-md-2">
                                                     <img src="{{ asset('storage/produk/' . $item->product->foto) }}"
                                                         class="img-fluid rounded" alt="Product" style="max-height: 80px;">
@@ -95,8 +96,7 @@
                                                 </div>
                                                 <div class="col-md-2">
                                                     <span class="fw-bold">Rp
-                                                        {{ number_format($item->product->harga) }}</span>
-                                                    <br>
+                                                        {{ number_format($item->product->harga) }}</span><br>
                                                     <small class="text-muted">per item</small>
                                                 </div>
                                                 <div class="col-md-3">
@@ -114,6 +114,7 @@
                                                             <i class="fas fa-plus"></i>
                                                         </button>
                                                     </div>
+
                                                     {{-- Hidden input untuk harga (angka mentah) --}}
                                                     <input type="hidden" name="harga"
                                                         value="{{ $item->product->harga }}">
@@ -176,18 +177,22 @@
 
                                     @auth
                                         {{-- Jika sudah login, bisa langsung checkout --}}
-                                        <form action="{{ route('checkout.proses') }}" method="POST">
+                                        <form action="{{ route('checkout.proses') }}" method="POST" id="checkout-form">
                                             @csrf
-                                            @foreach ($data as $item)
-                                                <input type="hidden" name="items[{{ $item->id }}][id_barang]"
-                                                    value="{{ $item->id_barang }}">
-                                                <input type="hidden" name="items[{{ $item->id }}][stok]"
-                                                    value="{{ $item->stok }}">
-                                                <input type="hidden" name="items[{{ $item->id }}][harga]"
-                                                    value="{{ $item->product->harga }}">
-                                                <input type="hidden" name="items[{{ $item->id }}][total]"
-                                                    value="{{ $item->stok * $item->product->harga }}">
-                                            @endforeach
+                                            {{-- Dynamic inputs akan diisi via JavaScript custom.js --}}
+                                            <div id="dynamic-inputs">
+                                                {{-- Fallback static inputs jika JavaScript tidak jalan --}}
+                                                @foreach ($data as $item)
+                                                    <input type="hidden" name="items[{{ $item->id }}][id_barang]"
+                                                        value="{{ $item->id_barang }}">
+                                                    <input type="hidden" name="items[{{ $item->id }}][stok]"
+                                                        value="{{ $item->stok }}">
+                                                    <input type="hidden" name="items[{{ $item->id }}][harga]"
+                                                        value="{{ $item->product->harga }}">
+                                                    <input type="hidden" name="items[{{ $item->id }}][total]"
+                                                        value="{{ $item->harga }}">
+                                                @endforeach
+                                            </div>
 
                                             <button type="submit" class="btn btn-primary w-100">
                                                 <i class="fas fa-credit-card me-2"></i>
