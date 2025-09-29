@@ -71,4 +71,47 @@ class CartService
 
         return collect($this->guestCartService->getGuestCart());
     }
+
+    public function updateCartStatus(int $userId, array $items): void
+    {
+        if (Auth::check()) {
+            $this->cartRepo->updateCartStatus($userId, $items);
+        }
+    }
+
+    public function clearCart(int $status = 1): void
+    {
+        if (Auth::check()) {
+            $this->cartRepo->clearCart(Auth::id(), $status);
+        }
+    }
+
+    public function calculateSubtotal(int $status = 0): int
+    {
+        $cartItems = $this->getCartItems($status);
+
+        return $cartItems->sum(function ($item) {
+            if (is_array($item)) {
+                return $item['total_harga'];
+            }
+            return $item->harga;
+        });
+    }
+
+    public function getCartSummary(int $status = 0): array
+    {
+        $cartItems = $this->getCartItems($status);
+
+        $totalQuantity = $cartItems->sum(function ($item) {
+            return is_array($item) ? $item['stok'] : $item->stok;
+        });
+
+        $subtotal = $this->calculateSubtotal($status);
+
+        return [
+            'total_quantity' => $totalQuantity,
+            'subtotal' => $subtotal,
+            'items_count' => $cartItems->count(),
+        ];
+    }
 }

@@ -27,7 +27,7 @@ class GuestCartService implements GuestCartRepositoryInterface
             ];
         }
 
-        Session::put(self::GUEST_CART_KEY, []);
+        Session::put(self::GUEST_CART_KEY, $guestCart);
     }
 
     public function getGuestCart(): array
