@@ -16,7 +16,7 @@ readonly class TransactionData
         public string $longitude = null,
     ) {}
 
-    public function fromRequest(prosesPembayaranRequest $request): self
+    public static function fromRequest(prosesPembayaranRequest $request): self
     {
         return new self(
             customerName: $request->string('namaAnda')->toString(),

@@ -10,6 +10,7 @@ use App\Enums\OrderStatusEnum;
 use App\Models\DetailTransaksi;
 use App\Models\Product;
 use App\ValueObjects\TransactionSummary;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -20,6 +21,11 @@ class TransactionService
         private readonly CartRepositoryInterface $cartRepo,
         private readonly ProductRepositoryInterface $productRepo,
     ) {}
+
+    public function getUserTransaction(int $userId): Collection
+    {
+        return $this->transactionRepo->getUserTransactions($userId);
+    }
 
     public function processPayment(TransactionData $transactionData, array $checkoutItems): string
     {
@@ -145,5 +151,31 @@ class TransactionService
             totalAmount: $subtotal + $shippingCost + $serviceFee,
             totalQuantity: $totalQuantity,
         );
+    }
+
+    private function findTransactionOrFail(string $code)
+    {
+        $transaction = $this->transactionRepo->findByCode($code);
+        if (!$transaction)
+        {
+            throw new \Exception('Pesanan tidak ditemukan');
+        }
+        return $transaction;
+    }
+
+    private function validateOrderStatus($transaction, string $action): void
+    {
+        $status = OrderStatusEnum::from($transaction->status_pesanan);
+
+        $canPerformAction = match($action) {
+            'confirm' => $status->canBeCompleted(),
+            'cancel' => $status->canBeCancelled(),
+            default => false,
+        };
+
+        if (!$canPerformAction) {
+            $actionText = $action === 'confirm' ? 'dikonfirmasi' : 'dibatalkan';
+            throw new \Exception("Pesanan tidak dapat {$actionText}. Status: {$status->getDisplayText()}");
+        }
     }
 }
