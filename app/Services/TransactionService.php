@@ -9,6 +9,7 @@ use App\DTOs\TransactionData;
 use App\Enums\OrderStatusEnum;
 use App\Models\DetailTransaksi;
 use App\Models\Product;
+use App\Models\transaksi;
 use App\ValueObjects\TransactionSummary;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -121,6 +122,59 @@ class TransactionService
         }
 
         $this->transactionRepo->deleteTransaction($transactionCode);
+    }
+
+    public function getTransactionByCode(string $code): ?transaksi
+    {
+        return $this->transactionRepo->findByCode($code);
+    }
+
+    public function canCancelOrder(string $transactionCode): bool 
+    {
+        $transaction = $this->getTransactionByCode($transactionCode);
+
+        if (!$transaction) {
+            return false;
+        }
+
+        $status = OrderStatusEnum::from($transaction->status_pesanan);
+        return $status->canBeCancelled();
+    }
+
+    public function canConfirmOrder(string $transactionCode): bool
+    {
+        $transaction = $this->getTransactionByCode($transactionCode);
+
+        if (!$transaction) {
+            return false;
+        }
+
+        $status = OrderStatusEnum::from($transaction->status_pesanan);
+        return $status->canBeCompleted();
+    }
+
+    public function getTransactionSummaryByCode(string $code): ?array
+    {
+        $transaction = $this->getTransactionByCode($code);
+
+        if (!$transaction) {
+            return null;
+        }
+
+        return [
+            'code' =>  $transaction->code_transaksi,
+            'customer_name' => $transaction->nama_pelanggan,
+            'address' => $transaction->alamat,
+            'phone' => $transaction->no_telp,
+            'courier' => $transaction->ekspedisi,
+            'payment_method' => $transaction->metode_pembayaran,
+            'subtotal' => $transaction->subtotal,
+            'shipping_cost' => $transaction->ongkir,
+            'service_fee' => $transaction->biaya_layanan,
+            'total_amount' => $transaction->total_pembayaran,
+            'status' => $transaction->status_pesanan,
+            'order_date' => $transaction->tanggal_pemesanan,
+        ];
     }
 
     private function calculateTransactionSummary($cartItems, TransactionData $transactionData): TransactionSummary
