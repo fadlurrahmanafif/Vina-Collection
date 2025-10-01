@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Services;
+namespace App\Handlers;
 
+use App\Services\ResponseService;
 use Illuminate\Http\RedirectResponse;
 
-class ExceptionHandlerService
+class ExceptionRedirectHandler
 {
     public function __construct(
-        private readonly ResponseService $responseService
+        private readonly ResponseService $responseService,
     ) {}
 
     public function handleWithRedirect(\Exception $e, string $defaultRoute = null): RedirectResponse
