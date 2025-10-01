@@ -13,13 +13,12 @@ readonly class ProcessPaymentAction
 {
     public function __construct(
         private TransactionService $transactionService,
-        private RequestHandlerService $requestHandler,
     ) {}
 
     public function execute(prosesPembayaranRequest $request): string
     {
-        $trasactionData = $this->requestHandler->createTransactionData($request);
-        $checkoutItems = $this->requestHandler->extractCheckoutItems($request);
+        $trasactionData = TransactionData::fromRequest($request);
+        $checkoutItems = $request->input('items', []);
 
         $trasactionCode = $this->transactionService->processPayment($trasactionData, $checkoutItems);
 
