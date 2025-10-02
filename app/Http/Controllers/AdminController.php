@@ -50,7 +50,7 @@ class AdminController extends Controller
 
     public function product()
     {
-        $data = Product::paginate(3);
+        $data = Product::paginate(t3);
         return view('admin.page.product', [
             'name' => 'Product',
             'title' => 'Admin Product',

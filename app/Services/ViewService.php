@@ -11,6 +11,7 @@ class ViewService
         private readonly ProductService $productService,
         private readonly CartService $cartService,
         private readonly TransactionService $transactionService,
+        private  readonly DashboardService $dashboardService,
     ) {}
 
     // <---------------------------------------------------------------------- User Views --------------------------------------------------------------------------->
@@ -78,7 +79,6 @@ class ViewService
         return view ('admin.page.dasboard', [
             'name' => 'Dashboard',
             'title' => 'Admin Dashboard',
-
         ]);
     }
 }
