@@ -8,6 +8,7 @@ use App\Models\DetailTransaksi;
 use App\Models\Product;
 use App\Models\transaksi;
 use App\Models\User;
+use App\Services\AdminViewService;
 use App\Services\DashboardService;
 use App\Services\ProductService;
 use App\Services\ProdukService;
@@ -25,18 +26,18 @@ class AdminController extends Controller
 
     public function __construct(
         private readonly ProductService $productService,
-        private readonly ViewService $viewService,
+        private readonly AdminViewService $adminviewService,
         )
     {
     }
     public function dasboard()
     {
-        return $this->viewService->dashboard();
+        return $this->adminviewService->dashboard();
     }
 
     public function product()
     {
-         return $this->viewService->adminProduct();
+         return $this->adminviewService->adminProduct();
     }
 
     // pesanan
