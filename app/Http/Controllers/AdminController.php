@@ -8,9 +8,11 @@ use App\Models\DetailTransaksi;
 use App\Models\Product;
 use App\Models\transaksi;
 use App\Models\User;
+use App\Services\DashboardService;
 use App\Services\ProductService;
 use App\Services\ProdukService;
 use App\Services\UserService;
+use App\Services\ViewService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -20,42 +22,21 @@ use function Laravel\Prompts\alert;
 
 class AdminController extends Controller
 {
-    protected $productService;
 
-    public function __construct(ProductService $productService)
+    public function __construct(
+        private readonly ProductService $productService,
+        private readonly ViewService $viewService,
+        )
     {
-        $this->productService = $productService;
     }
     public function dasboard()
     {
-        $totalProduk = \App\Models\Product::count();
-        $totalPesanan = \App\Models\transaksi::count();
-        $totalUser = \App\Models\User::count();
-
-        $recentProduk = \App\Models\Product::latest()->first();
-        $recentPesanan = \App\Models\transaksi::latest()->first();
-        $recentUser = \App\Models\User::latest()->first();
-
-        return view('admin.page.dasboard', [
-            'name' => 'Dashboard',
-            'title' =>  'Admin Dasboard',
-            'totalProduk' => $totalProduk,
-            'totalPesanan' => $totalPesanan,
-            'totalUser' => $totalUser,
-            'recentProduk' => $recentProduk,
-            'recentPesanan' => $recentPesanan,
-            'recentUser' => $recentUser,
-        ]);
+        return $this->viewService->dashboard();
     }
 
     public function product()
     {
-        $data = Product::paginate(t3);
-        return view('admin.page.product', [
-            'name' => 'Product',
-            'title' => 'Admin Product',
-            'data' => $data,
-        ]);
+         return $this->viewService->adminProduct();
     }
 
     // pesanan

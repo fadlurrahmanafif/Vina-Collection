@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
@@ -74,11 +75,24 @@ class ViewService
 
     // <---------------------------------------------------------------------- Admin Views --------------------------------------------------------------------------->
 
-    public function dashboard()
+    public function dashboard(): View
     {
+        $dashboardData = $this->dashboardService->getDashboardData();
+
         return view ('admin.page.dasboard', [
             'name' => 'Dashboard',
             'title' => 'Admin Dashboard',
+        ]+ $dashboardData);
+    }
+
+    public function adminProduct()
+    {
+        $data = Product::paginate(3);
+
+        return view ('admin.page.product', [
+            'name' => 'Product',
+            'title' => 'Admin Product',
+            'data' => $data,
         ]);
     }
 }

@@ -11,10 +11,10 @@ class DashboardService
     public function getDashboardData()
     {
         return [
-            'totalProduct' => Product::count(),
+            'totalProduk' => Product::count(),
             'totalPesanan' => transaksi::count(),
             'totalUser' => User::count(),
-            'recentProduct' => Product::latest()->first(),
+            'recentProduk' => Product::latest()->first(),
             'recentPesanan' => transaksi::latest()->first(),
             'recentUser' =>User::latest()->first(),
         ];
