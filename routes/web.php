@@ -14,7 +14,7 @@ Route::get('/cart', [UserController::class, 'cart'])->name('keranjang');
 Route::post('/addCart', [UserController::class, 'addCart'])->name('add.to.cart');
 Route::delete('/cart/delete/{id}', [UserController::class, 'destroyCart'])->name('delete.cart');
 
-Route::middleware('auth')->group(function () {
+Route::middleware('auth:web')->group(function () {
     Route::get('/checkout', [UserController::class, 'checkout'])->name('checkout');
     Route::post('/checkout/proses', [UserController::class, 'checkoutProses'])->name('checkout.proses');
     Route::post('/prosespembayaran', [UserController::class, 'prosesPembayaran'])->name('proses.pembayaran');
@@ -32,14 +32,14 @@ Route::middleware('auth')->group(function () {
 
 
 // auth admin route
-Route::middleware('guest')->group(function () {
+Route::middleware('guest:admin')->group(function () {
     // login route
     Route::get('/adminlogin', [AdminController::class, 'showLogin'])->name('admin.login');
     Route::post('/adminlogin', [AdminController::class, 'loginAdmin'])->name('login.admin');
 });
 
 // Admin route
-Route::middleware(['admin'])->group(function () {
+Route::middleware('auth:admin')->group(function () {
     Route::get('/dasboard', [AdminController::class, 'dasboard'])->name('dasboard');
     Route::get('/userdata', [AdminController::class, 'userData'])->name('user.data');
 
@@ -61,7 +61,7 @@ Route::middleware(['admin'])->group(function () {
 
 
 // auth user route
-Route::middleware('guest')->group(function () {
+Route::middleware('guest:web')->group(function () {
     // login route
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('login', [AuthController::class, 'login'])->name('login.post');

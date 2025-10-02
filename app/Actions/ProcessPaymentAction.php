@@ -17,18 +17,20 @@ readonly class ProcessPaymentAction
 
     public function execute(prosesPembayaranRequest $request): string
     {
+        
+        
         $trasactionData = TransactionData::fromRequest($request);
         $checkoutItems = $request->input('items', []);
 
-        $trasactionCode = $this->transactionService->processPayment($trasactionData, $checkoutItems);
+        $transactionCode = $this->transactionService->processPayment($trasactionData, $checkoutItems);
 
-        Log::info('Paymed processed succesfully', [
-            'transavtion_code' => $trasactionCode,
+        Log::info('Payment processed succesfully', [
+            'transaction_code' => $transactionCode,
             'user_id' => Auth::id(),
             'courier' => $trasactionData->courier,
             'payment_method' => $trasactionData->paymentMethod, 
         ]);
         
-        return $trasactionCode;
+        return $transactionCode;
     }
 }

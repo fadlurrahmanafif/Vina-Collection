@@ -20,7 +20,7 @@
                                         {{-- Tambahan info untuk pesanan dibatalkan --}}
                                         @if ($transaksi->status_pesanan === 'dibatalkan')
                                             <br><small class="text-danger"><i class="fas fa-info-circle"></i> Pesanan ini
-                                                telah dibatalkan dan akan dihapus oleh admin</small>
+                                                berhasil dibatalkan</small>
                                         @endif
                                     </div>
                                     <div class="col-md-6 text-end">
@@ -165,7 +165,7 @@
                                                             {{ number_format($detail->harga_satuan ?: ($detail->product ? $detail->product->harga : 0), 0, ',', '.') }}
                                                         </td>
                                                         <td>{{ $detail->stok }} pcs</td>
-                                                        <td>Rp {{ number_format($detail->harga, 0, ',', '.') }}</td>
+                                                        <td>Rp {{ number_format($detail->harga * $detail->stok, 0, ',', '.') }}</td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>

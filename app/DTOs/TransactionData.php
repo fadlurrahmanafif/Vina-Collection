@@ -12,8 +12,8 @@ readonly class TransactionData
         public string $phone,
         public string $courier,
         public string $paymentMethod,
-        public string $latitude = null,
-        public string $longitude = null,
+        public ?string $latitude = null,
+        public ?string $longitude = null,
     ) {}
 
     public static function fromRequest(prosesPembayaranRequest $request): self

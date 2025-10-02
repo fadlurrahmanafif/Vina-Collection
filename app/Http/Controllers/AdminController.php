@@ -8,6 +8,7 @@ use App\Models\DetailTransaksi;
 use App\Models\Product;
 use App\Models\transaksi;
 use App\Models\User;
+use App\Services\ProductService;
 use App\Services\ProdukService;
 use App\Services\UserService;
 use Illuminate\Http\Request;
@@ -19,13 +20,11 @@ use function Laravel\Prompts\alert;
 
 class AdminController extends Controller
 {
-    protected $produkService;
-    protected $userService;
+    protected $productService;
 
-    public function __construct(ProdukService $produkService, UserService $userService)
+    public function __construct(ProductService $productService)
     {
-        $this->produkService = $produkService;
-        $this->userService = $userService;
+        $this->productService = $productService;
     }
     public function dasboard()
     {
@@ -166,7 +165,7 @@ class AdminController extends Controller
     {
         // Jika sampai di sini berarti validation passed
         try {
-            $this->produkService->store(
+            $this->productService->store(
                 $request->validated(),
                 $request->file('foto')
             );

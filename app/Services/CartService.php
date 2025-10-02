@@ -66,6 +66,8 @@ class CartService
     public function getCartItems(int $status = 0)
     {
         if (Auth::check()) {
+            $this->mergeGuestCartToUser();
+
             return $this->cartRepo->getCartItems(Auth::id(), $status);
         }
 

@@ -26,7 +26,7 @@ class TransactionRepository implements TransactionRepositoryInterface
     {
         foreach ($items as $item) {
             DetailTransaksi::create([
-                'id_transakasi' => $transactionId,
+                'id_transaksi' => $transactionId,
                 'id_transaksi_code' => $transactionCode,
                 'id_barang' => $item->id_barang,
                 'nama_barang' => $item->product->nama_produk,

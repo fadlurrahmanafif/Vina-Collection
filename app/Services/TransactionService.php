@@ -83,7 +83,7 @@ class TransactionService
         $transaction = $this->transactionRepo->findByCode($transactionCode);
 
         if (!$transaction) {
-            throw new \Exception('pesana tidak ditemukan');
+            throw new \Exception('pesanan tidak ditemukan');
         }
 
         $status = OrderStatusEnum::from($transaction->status_pesanan);
@@ -179,7 +179,7 @@ class TransactionService
 
     private function calculateTransactionSummary($cartItems, TransactionData $transactionData): TransactionSummary
     {
-        $subtotal = $cartItems->sum('harga');
+        $subtotal = $cartItems->sum(fn($item) => $item->harga * $item->stok);
         $totalQuantity = $cartItems->sum('stok');
 
         $shippingCost = match ($transactionData->courier) {

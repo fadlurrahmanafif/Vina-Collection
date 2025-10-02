@@ -2,9 +2,6 @@
 
 namespace App\Services;
 
-use App\Repositories\CartRepository;
-use App\Repositories\ProductRepository;
-use App\Repositories\TransactionRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
@@ -16,6 +13,7 @@ class ViewService
         private readonly TransactionService $transactionService,
     ) {}
 
+    // <---------------------------------------------------------------------- User Views --------------------------------------------------------------------------->
     public function homepage(array $filters): View
     {
         return view('user.page.index', [
@@ -37,7 +35,8 @@ class ViewService
 
     public function cart(): View
     {
-        $cartItems = $this->cartService->getCartItems(1);
+        $cartItems = $this->cartService->getCartItems(0);
+        // dd($cartItems);die;
 
         return view('user.page.cart', [
             'title' => 'Keranjang',
@@ -51,11 +50,13 @@ class ViewService
     {
         $this->cartService->mergeGuestCartToUser();
         $cartItems = $this->cartService->getCartItems(1);
+        
 
         return view('user.page.checkout', [
             'title' => 'Checkout',
             'user' => Auth::user(),
             'count' => $this->cartService->getcartCount(),
+            'cartItems' => $cartItems,
             'detailBelanja' => $cartItems->sum(fn($item) => $item->stok * $item->harga),
         ]);
     }
@@ -65,7 +66,19 @@ class ViewService
         return view('user.page.status', [
             'title' => 'Status Pesanan',
             'count' => $this->cartService->getcartCount(),
-            'transaksiuser' => $this->transactionService->getUserTransaction(Auth::id()),
+            'transaksiUser' => $this->transactionService->getUserTransaction(Auth::id()),
+        ]);
+    }
+
+
+    // <---------------------------------------------------------------------- Admin Views --------------------------------------------------------------------------->
+
+    public function dashboard()
+    {
+        return view ('admin.page.dasboard', [
+            'name' => 'Dashboard',
+            'title' => 'Admin Dashboard',
+
         ]);
     }
 }

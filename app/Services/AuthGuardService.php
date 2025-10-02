@@ -9,7 +9,7 @@ class AuthGuardService
 {
     public function requireAuth(string $route = 'login', string $message = null): ?RedirectResponse
     {
-        if (!Auth::check()) {
+        if (!Auth::guard('web')->check()) {
             $response = redirect()->route($route);
 
             if ($message) {
@@ -22,15 +22,20 @@ class AuthGuardService
         return null;
     }
 
-    public function requireAuthForCheckout(): ? RedirectResponse
+    public function requireAuthForCheckout(): ?RedirectResponse
     {
-        return $this->requireAuth(
+        $redirect =  $this->requireAuth(
             'login',
             'Anda harus login terlebih dahulu untuk melakukan checkout,',
-        )->with('checkout_redirect', true);
+        );
+        if ($redirect) {
+            $redirect->with('checkout_redirect', true);
+        }
+
+        return $redirect;
     }
 
-    public function requireAuthForOrderStatus(): ? RedirectResponse
+    public function requireAuthForOrderStatus(): ?RedirectResponse
     {
         return $this->requireAuth(
             'login',

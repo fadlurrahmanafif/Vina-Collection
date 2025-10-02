@@ -5,7 +5,7 @@ namespace App\Handlers;
 use App\Services\ResponseService;
 use Illuminate\Http\RedirectResponse;
 
-class ExceptionRedirectHandler
+class ExceptionHandler
 {
     public function __construct(
         private readonly ResponseService $responseService,

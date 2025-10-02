@@ -12,7 +12,7 @@ class CartRepository implements CartRepositoryInterface
 {
     public function getcartCount(int $userId = null): int
     {
-        $userid = $userId ?? Auth::id();
+        $userId = $userId ?? Auth::id();
         return Cart::where('id_user', $userId)->where('status', 0)->count();
     }
 
@@ -38,14 +38,13 @@ class CartRepository implements CartRepositoryInterface
 
         if ($existingCart) {
             $existingCart->stok += $stok;
-            $existingCart->harga += ($product->harga * $stok);
             $existingCart->save();
         } else {
             Cart::create([
                 'id_user' => $userId,
                 'id_barang' => $productId,
                 'stok' => $stok,
-                'harga' => $product->harga * $stok,
+                'harga' => $product->harga,
                 'status' => 0,
             ]);
         }
@@ -67,8 +66,8 @@ class CartRepository implements CartRepositoryInterface
             Cart::where('id', $cartId)
                 ->where('id_user', $userId)
                 ->update([
-                    'stok' => (int) $items['stok'],
-                    'harga' => (int) $item['stok'] * (int) $item['harga'],
+                    'stok' => (int) $item['stok'],
+                    'harga' => (int) $item['harga'],
                     'status' => 1,
                 ]);
         }
@@ -79,13 +78,12 @@ class CartRepository implements CartRepositoryInterface
         foreach ($guestCart as $item) {
             $existingCart = Cart::where([
                 'id_user' => $userId,
-                'id_baranng' => $item['id_barang'],
+                'id_barang' => $item['id_barang'],
                 'status' => 0,
             ])->first();
 
             if ($existingCart) {
                 $existingCart->stok += $item['stok'];
-                $existingCart->harga += $item['harga'];
                 $existingCart->save();
             } else {
                 Cart::create([

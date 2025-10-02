@@ -3,19 +3,21 @@
 namespace App\Actions;
 
 use App\Services\CartService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class ProcessCheckoutAction
+readonly class ProcessCheckoutAction
 {
     public function __construct(
         private readonly CartService $cartService,
     ) {}
 
-    public function execute(array $items)
+    public function execute(Request $request)
     {
-        return $this->cartService->updateCartStatus(
+        
+        $this->cartService->updateCartStatus(
             Auth::id(),
-            $items,
+            $request->input('items', [])
         );
     }
 }

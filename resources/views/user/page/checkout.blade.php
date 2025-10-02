@@ -216,7 +216,7 @@
                                     <div class="col-md-2 col-4">
                                         <small class="text-muted d-block">Subtotal</small>
                                         <span class="fw-bold text-primary">Rp.
-                                            {{ number_format($item->harga, 0, ',', '.') }}</span>
+                                            {{ number_format($detailBelanja, 0, ',', '.') }}</span>
                                     </div>
                                 </div>
                             @endforeach
