@@ -48,4 +48,30 @@ class ViewService
         ]);
     }
 
+    public function checkout(): View
+    {
+        $this->cartService->mergeGuestCartToUser();
+        $cartItems = $this->cartService->getCartItems(1);
+        
+
+        return view('user.page.checkout', [
+            'title' => 'Checkout',
+            'user' => Auth::user(),
+            'count' => $this->cartService->getcartCount(),
+            'cartItems' => $cartItems,
+            'detailBelanja' => $cartItems->sum(fn($item) => $item->stok * $item->harga),
+        ]);
+    }
+
+    public function orderStatus(): View
+    {
+        return view('user.page.status', [
+            'title' => 'Status Pesanan',
+            'count' => $this->cartService->getcartCount(),
+            'transaksiUser' => $this->transactionService->getUserTransaction(Auth::id()),
+        ]);
+    }
+
+
+
 }
