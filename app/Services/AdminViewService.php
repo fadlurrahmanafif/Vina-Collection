@@ -11,6 +11,7 @@ class AdminViewService
     public function __construct(
         private readonly DashboardService $dashboardService,
         private readonly ProductService $productService,
+        private readonly DataOrderService $dataOrderService,
     )
     {}
 
@@ -34,6 +35,17 @@ class AdminViewService
             'name' => 'Product',
             'title' => 'Admin Product',
             'data' => $data,
+        ]);
+    }
+
+    public function adminDataOrder()
+    {
+        $pesanan = $this->dataOrderService->getAllOrdersPaginated();
+
+        return view ('admin.page.pesanan', [
+            'name' => 'Data Pesanan',
+            'title' => 'Admin Data Pesanan',
+            'pesanan' => $pesanan
         ]);
     }
 }

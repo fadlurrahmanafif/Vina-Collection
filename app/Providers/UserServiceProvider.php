@@ -20,7 +20,6 @@ class UserServiceProvider extends ServiceProvider
         \App\Services\ProductService::class => \App\Services\ProductService::class,
         \App\Services\RequestHandlerService::class => \App\Services\RequestHandlerService::class,
         \App\Services\AuthGuardService::class => \App\Services\AuthGuardService::class,
-        \App\Services\ExceptionHandlerService::class => \App\Services\ExceptionHandlerService::class,
         \App\Services\ResponseService::class => \App\Services\ResponseService::class,
     ];
 

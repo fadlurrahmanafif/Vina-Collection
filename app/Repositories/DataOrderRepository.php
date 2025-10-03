@@ -6,14 +6,13 @@ use App\Contracts\DataOrderRepositoryInterface;
 use App\Models\DetailTransaksi;
 use App\Models\Product;
 use App\Models\transaksi;
-use Dotenv\Repository\RepositoryInterface;
 
 class DataOrderRepository implements DataOrderRepositoryInterface
 {
     public function getAllOrdersPaginated(int $perPage = 10)
     {
         return transaksi::with('details.product')
-        ->orderBy('tanggal_pesanan', 'desc')
+        ->orderBy('tanggal_pemesanan', 'desc')
         ->paginate($perPage);
     }
 

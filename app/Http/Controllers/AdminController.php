@@ -43,86 +43,79 @@ class AdminController extends Controller
     // pesanan
     public function dataPesanan()
     {
-        $pesanan = transaksi::with('details.products')
-            ->orderBy('tanggal_pemesanan', 'desc')
-            ->paginate(10);
-        return view('admin.page.pesanan', [
-            'name' => 'Data Pesanan',
-            'title' => 'Admin Data Pesanan',
-            'pesanan' => $pesanan,
-        ]);
+        return $this->adminviewService->adminDataOrder();
     }
 
-    public function updateStatusPesanan(Request $request, $id)
-    {
-        try {
-            $transaksi = transaksi::findOrFail($id);
+        public function updateStatusPesanan(Request $request, $id)
+        {
+            try {
+                $transaksi = transaksi::findOrFail($id);
 
-            $request->validate([
-                'status_pesanan' => 'required|in:pending,dikonfirmasi,diproses,dikirim,selesai,dibatalkan'
-            ]);
+                $request->validate([
+                    'status_pesanan' => 'required|in:pending,dikonfirmasi,diproses,dikirim,selesai,dibatalkan'
+                ]);
 
-            // PERBAIKAN: Jika admin mengubah status ke 'dibatalkan', kembalikan stok
-            if ($request->status_pesanan === 'dibatalkan' && $transaksi->status_pesanan !== 'dibatalkan') {
-                DB::beginTransaction();
+                // PERBAIKAN: Jika admin mengubah status ke 'dibatalkan', kembalikan stok
+                if ($request->status_pesanan === 'dibatalkan' && $transaksi->status_pesanan !== 'dibatalkan') {
+                    DB::beginTransaction();
 
-                // Kembalikan stok produk jika belum dikembalikan
-                $details = DetailTransaksi::where('id_transaksi_code', $transaksi->code_transaksi)->get();
-                foreach ($details as $detail) {
-                    $product = Product::find($detail->id_barang);
-                    if ($product) {
-                        $product->stok += $detail->stok;
-                        $product->stok_out -= $detail->stok;
-                        $product->save();
+                    // Kembalikan stok produk jika belum dikembalikan
+                    $details = DetailTransaksi::where('id_transaksi_code', $transaksi->code_transaksi)->get();
+                    foreach ($details as $detail) {
+                        $product = Product::find($detail->id_barang);
+                        if ($product) {
+                            $product->stok += $detail->stok;
+                            $product->stok_out -= $detail->stok;
+                            $product->save();
+                        }
                     }
+
+                    // Update status transaksi (data detail tetap ada, tidak dihapus)
+                    $transaksi->update([
+                        'status_pesanan' => $request->status_pesanan
+                    ]);
+
+                    DB::commit();
+                } else {
+                    // Status lainnya, update normal
+                    $transaksi->update([
+                        'status_pesanan' => $request->status_pesanan
+                    ]);
                 }
 
-                // Update status transaksi (data detail tetap ada, tidak dihapus)
-                $transaksi->update([
-                    'status_pesanan' => $request->status_pesanan
-                ]);
+                Alert::success('Berhasil!', 'Status pesanan berhasil diupdate');
+                return redirect()->back();
+            } catch (\Exception $e) {
+                if (isset($request->status_pesanan) && $request->status_pesanan === 'dibatalkan') {
+                    DB::rollback();
+                }
+                Alert::error('Error', 'Gagal mengupdate status: ' . $e->getMessage());
+                return redirect()->back();
+            }
+        }
+
+        public function destroyPesanan(Request $request, $id)
+        {
+            try {
+                DB::beginTransaction();
+
+                $data = transaksi::findOrFail($id);
+
+                DetailTransaksi::where('id_transaksi_code', $data->code_transaksi)->delete();
+
+                $data->delete();
+
 
                 DB::commit();
-            } else {
-                // Status lainnya, update normal
-                $transaksi->update([
-                    'status_pesanan' => $request->status_pesanan
-                ]);
+
+                Alert::toast('Data berhasil dihapus', 'success');
+                return redirect()->route('data.pesanan');
+            } catch (\Exception $e) {
+                DB::rollBack();
+                Alert::error('Error', 'Gagal menghapus data: ' . $e->getMessage());
+                return redirect()->back();
             }
-
-            Alert::success('Berhasil!', 'Status pesanan berhasil diupdate');
-            return redirect()->back();
-        } catch (\Exception $e) {
-            if (isset($request->status_pesanan) && $request->status_pesanan === 'dibatalkan') {
-                DB::rollback();
-            }
-            Alert::error('Error', 'Gagal mengupdate status: ' . $e->getMessage());
-            return redirect()->back();
         }
-    }
-
-    public function destroyPesanan(Request $request, $id)
-    {
-        try {
-            DB::beginTransaction();
-
-            $data = transaksi::findOrFail($id);
-
-            DetailTransaksi::where('id_transaksi_code', $data->code_transaksi)->delete();
-
-            $data->delete();
-
-
-            DB::commit();
-
-            Alert::toast('Data berhasil dihapus', 'success');
-            return redirect()->route('data.pesanan');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Alert::error('Error', 'Gagal menghapus data: ' . $e->getMessage());
-            return redirect()->back();
-        }
-    }
 
     // user data
     public function userData()
