@@ -9,7 +9,7 @@ enum OrderStatusEnum: string
     case PROCESSING = 'diproses';
     case SHIPPED = 'dikirim';
     case COMPLETED = 'selesai';
-    case CANCELED = 'dibatalkan';
+    case CANCELLED = 'dibatalkan';
 
     public function getDisplayText(): string
     {
@@ -19,7 +19,7 @@ enum OrderStatusEnum: string
             self::PROCESSING => 'Sedang di proses',
             self::SHIPPED => 'Dalam Pengiriman',
             self::COMPLETED => 'Selesal',
-            self::CANCELED => 'Dibatalkan',
+            self::CANCELLED => 'Dibatalkan',
         };
     }
 
