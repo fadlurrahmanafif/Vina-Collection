@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
+use App\Http\Requests\ProductRequest;
 use App\Http\Requests\ProdukRequest;
 use App\Models\DetailTransaksi;
 use App\Models\Product;
@@ -136,7 +137,7 @@ class AdminController extends Controller
         ]);
     }
 
-    public function store(ProdukRequest $request)
+    public function store(ProductRequest $request)
     {
         // Jika sampai di sini berarti validation passed
         try {
