@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Product;
+use Database\Factories\UserFactory;
 use Illuminate\Contracts\View\View as ViewView;
 
 class AdminViewService
@@ -48,4 +49,5 @@ class AdminViewService
             'pesanan' => $pesanan
         ]);
     }
+
 }
