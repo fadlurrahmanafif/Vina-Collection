@@ -2,19 +2,18 @@
 
 namespace App\Actions;
 
+use App\Http\Requests\ProductRequest;
 use App\Services\ProductService;
-use Illuminate\Http\Request;
 
-class UpdateProductAction
+class StoreDataProductAction
 {
     public function __construct(
         private ProductService $productService,
     ) {}
 
-    public function execute(int $productId, Request $request)
+    public function execute(ProductRequest $request)
     {
-        $this->productService->update(
-            $productId,
+        $this->productService->store(
             $request->validated(),
             $request->file('foto'),
         );

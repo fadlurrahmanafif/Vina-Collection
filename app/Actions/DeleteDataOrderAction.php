@@ -4,7 +4,7 @@ namespace App\Actions;
 
 use App\Services\DataOrderService;
 
-readonly class DeleteOrderAction
+readonly class DeleteDataOrderAction
 {
     public function __construct(
         private readonly DataOrderService $dataOrderService,

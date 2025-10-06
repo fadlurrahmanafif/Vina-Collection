@@ -5,7 +5,7 @@ namespace App\Actions;
 use App\Services\DataOrderService;
 use Illuminate\Http\Request;
 
-readonly class UpdateOrderStatusAction
+readonly class UpdateDataOrderStatusAction
 {
     public function __construct(
         private readonly DataOrderService $dataOrderService,

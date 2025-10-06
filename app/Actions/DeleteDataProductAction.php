@@ -4,7 +4,7 @@ namespace App\Actions;
 
 use App\Services\ProductService;
 
-class DeleteProductAction
+class DeleteDataProductAction
 {
     public function __construct(
         private ProductService $productService,
