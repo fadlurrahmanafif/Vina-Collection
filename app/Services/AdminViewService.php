@@ -69,11 +69,14 @@ class AdminViewService
         ]);
     }
 
-    public function editProductModal(int $productId): void
+    public function editProductModal(int $productId)
     {
         $product = $this->dataproductService->getProductById($productId);
 
-
+        return view('admin.modal.edit-modal', [
+            'title' => 'Edit Data Product',
+            'data' => $product,
+        ]);
     }
 
 }
