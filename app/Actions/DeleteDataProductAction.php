@@ -2,16 +2,16 @@
 
 namespace App\Actions;
 
-use App\Services\ProductService;
+use App\Services\DataProductService;
 
 class DeleteDataProductAction
 {
     public function __construct(
-        private ProductService $productService,
+        private DataProductService $dataproductService,
     ) {}
 
     public function execute(int $productId)
     {
-        $this->productService->delete($productId);
+        $this->dataproductService->delete($productId);
     }
 }
