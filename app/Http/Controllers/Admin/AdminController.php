@@ -2,6 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\AdminLoginAction;
+use App\Actions\DeleteDataOrderAction;
+use App\Actions\DeleteDataProductAction;
+use App\Actions\StoreDataProductAction;
+use App\Actions\UpdateDataOrderStatusAction;
+use App\Actions\UpdateDataProductAction;
+use App\Handlers\ExceptionHandler;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\ProductRequest;
 use App\Http\Requests\ProdukRequest;
@@ -9,12 +16,11 @@ use App\Models\DetailTransaksi;
 use App\Models\Product;
 use App\Models\transaksi;
 use App\Models\User;
+use App\Services\AdminAuthService;
 use App\Services\AdminViewService;
 use App\Services\DashboardService;
-use App\Services\ProductService;
-use App\Services\ProdukService;
-use App\Services\UserService;
-use App\Services\ViewService;
+use App\Services\DataProductService;
+use App\Services\ResponseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -26,7 +32,14 @@ class AdminController extends Controller
 {
 
     public function __construct(
-        private readonly ProductService $productService,
+        private readonly ResponseService $responseService,
+        private readonly ExceptionHandler $exceptionHandler,
+        private readonly UpdateDataOrderStatusAction $updateDataOrderStatusAction,
+        private readonly DeleteDataOrderAction $deleteDataOrderAction,
+        private readonly StoreDataProductAction $storeDataProductAction,
+        private readonly UpdateDataProductAction $updateDataProductAction,
+        private readonly DeleteDataProductAction $deleteDataProductAction,
+        private readonly DataProductService $productService,
         private readonly AdminViewService $adminviewService,
         )
     {
@@ -141,14 +154,7 @@ class AdminController extends Controller
     {
         // Jika sampai di sini berarti validation passed
         try {
-            $this->productService->store(
-                $request->validated(),
-                $request->file('foto')
-            );
-
-            return redirect()
-                ->route('product')
-                ->with('success', 'Produk berhasil ditambahkan');
+            
         } catch (\Exception $e) {
             return redirect()
                 ->route('product')
@@ -203,36 +209,4 @@ class AdminController extends Controller
         return redirect()->route('product');
     }
 
-
-    // auth admin
-
-    public function showLogin()
-    {
-        return view('admin.page.login', [
-            'title' => 'Admin Login'
-        ]);
-    }
-
-    public function loginAdmin(LoginRequest $request)
-    {
-        $credentials = $request->validated();
-
-        if (Auth::guard('admin')->attempt($credentials)) {
-            $request->session()->regenerate();
-            return redirect()->intended('dasboard');
-        }
-
-        return back()->withErrors([
-            'email' => 'Email atau password salah',
-        ]);
-    }
-
-    public function logoutadmin(Request $request)
-    {
-        Auth::guard('admin')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return redirect('/adminlogin');
-    }
 }
