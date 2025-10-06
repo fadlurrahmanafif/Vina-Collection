@@ -14,9 +14,9 @@ interface DataProductRepositoryInterface
 
     public function create(array $data): Product;
 
-    public function update(int $productId, array $data): void;
+    public function update(int $productId, array $data): bool;
 
-    public function delete(int $productId): void;
+    public function delete(int $productId): bool|null;
 
     public function getLowStockProduct(int $threshold = 5);
 }
