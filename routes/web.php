@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
@@ -34,8 +35,8 @@ Route::middleware('auth:web')->group(function () {
 // auth admin route
 Route::middleware('guest:admin')->group(function () {
     // login route
-    Route::get('/adminlogin', [AdminController::class, 'showLogin'])->name('admin.login');
-    Route::post('/adminlogin', [AdminController::class, 'loginAdmin'])->name('login.admin');
+    Route::get('/adminlogin', [AdminAuthController::class, 'showLogin'])->name('admin.login');
+    Route::post('/adminlogin', [AdminAuthController::class, 'loginAdmin'])->name('login.admin');
 });
 
 // Admin route
@@ -56,7 +57,7 @@ Route::middleware('auth:admin')->group(function () {
     Route::put('/product/updateData/{id}', [AdminController::class, 'update'])->name('update.data');
     Route::delete('/product/deleteData/{id}', [AdminController::class, 'destroy'])->name('delete.data');
 
-    Route::post('/logoutadmin', [AdminController::class, 'logoutadmin'])->name('logout.admin');
+    Route::post('/logoutadmin', [AdminAuthController::class, 'logoutadmin'])->name('logout.admin');
 });
 
 

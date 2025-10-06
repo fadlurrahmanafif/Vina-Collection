@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Actions\AdminLoginAction;
+use App\Handlers\ExceptionHandler;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Services\AdminAuthService;
 use App\Services\AdminViewService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -16,33 +16,34 @@ class AuthController extends Controller
         private readonly AdminAuthService $adminAuthService,
         private readonly AdminLoginAction $adminLoginAction,
         private readonly AdminViewService $adminViewService,
+        private readonly ExceptionHandler $exceptionHandler,
     ) {}
 
     public function showLogin()
     {
-        return $this->adminViewService
+        return $this->adminViewService->loginPage();
     }
 
     public function loginAdmin(LoginRequest $request)
     {
-        $credentials = $request->validated();
+        try {
+            $success = $this->adminLoginAction->execute($request);
 
-        if (Auth::guard('admin')->attempt($credentials)) {
-            $request->session()->regenerate();
-            return redirect()->intended('dasboard');
+            if ($success) {
+                return redirect()->intended('dasboard');
+            }
+
+            return back()->withErrors([
+                'email' => 'Email atau Password salah',
+            ]);
+        } catch (\Exception $e) {
+            return $this->exceptionHandler->handleWithRedirect($e);
         }
-
-        return back()->withErrors([
-            'email' => 'Email atau password salah',
-        ]);
     }
 
     public function logoutadmin(Request $request)
     {
-        Auth::guard('admin')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
+        $this->adminAuthService->logout($request);
         return redirect('/adminlogin');
     }
 }
