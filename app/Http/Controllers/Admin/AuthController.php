@@ -6,6 +6,7 @@ use App\Actions\AdminLoginAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Services\AdminAuthService;
+use App\Services\AdminViewService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -14,15 +15,12 @@ class AuthController extends Controller
     public function __construct(
         private readonly AdminAuthService $adminAuthService,
         private readonly AdminLoginAction $adminLoginAction,
+        private readonly AdminViewService $adminViewService,
     ) {}
-
-    // auth admin
 
     public function showLogin()
     {
-        return view('admin.page.login', [
-            'title' => 'Admin Login'
-        ]);
+        return $this->adminViewService
     }
 
     public function loginAdmin(LoginRequest $request)

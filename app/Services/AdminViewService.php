@@ -79,4 +79,11 @@ class AdminViewService
         ]);
     }
 
+    public function loginPage()
+    {
+        return view ('admin.page.login', [
+            'title' => 'Login Admin',
+        ]);
+    }
+
 }
