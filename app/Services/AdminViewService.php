@@ -11,8 +11,9 @@ class AdminViewService
 
     public function __construct(
         private readonly DashboardService $dashboardService,
-        private readonly ProductService $productService,
+        private readonly DataProductService $dataproductService,
         private readonly DataOrderService $dataOrderService,
+        private readonly DataUserService $dataUserService,
     )
     {}
 
@@ -33,8 +34,8 @@ class AdminViewService
         $data = Product::paginate(3);
 
         return view ('admin.page.product', [
-            'name' => 'Product',
-            'title' => 'Admin Product',
+            'name' => 'Data Product',
+            'title' => 'Admin Data Product',
             'data' => $data,
         ]);
     }
@@ -48,6 +49,31 @@ class AdminViewService
             'title' => 'Admin Data Pesanan',
             'pesanan' => $pesanan
         ]);
+    }
+
+    public function adminDataUsers()
+    {
+        $users = $this->dataUserService->getAllUsers(3);
+
+        return view('admin.page.userdata', [
+            'name' => 'Data User',
+            'title' => 'Admin Data User',
+            'data' => $users,
+        ]);
+    }
+
+    public function addProductModal()
+    {
+        return view('admin.modal.add-modal', [
+            'title' => 'Tambah Data Product'
+        ]);
+    }
+
+    public function editProductModal(int $productId): void
+    {
+        $product = $this->dataproductService->getProductById($productId);
+
+
     }
 
 }

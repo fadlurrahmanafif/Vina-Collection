@@ -10,7 +10,7 @@ interface DataProductRepositoryInterface
 
     public function getAllPaginated(int $perPage = 10);
 
-    public function finById(int $id): Product;
+    public function findById(int $id): Product;
 
     public function create(array $data): Product;
 

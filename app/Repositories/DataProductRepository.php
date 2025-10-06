@@ -17,7 +17,7 @@ class DataProductRepository implements DataProductRepositoryInterface
         return Product::latest()->paginate($perPage);
     }
 
-    public function finById(int $id): Product
+    public function findById(int $id): Product
     {
         return Product::findOrFail($id);
     }
