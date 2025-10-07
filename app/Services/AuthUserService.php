@@ -9,13 +9,19 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 
 class AuthUserService
 {
+    public function __construct(
+        private readonly CartService $cartService,
+    )
+    {}
+
     /**
      * Handle user registration.
      */
-    public function handleRegister(RegisterRequest $request): array
+    public function handleRegister(RegisterRequest $request)
     {
         try {
             DB::beginTransaction();
@@ -31,11 +37,7 @@ class AuthUserService
 
             DB::commit();
 
-            return [
-                'success' => true,
-                'user' => $user,
-                'message' => 'Registrasi Berhasil!'
-            ];
+           return redirect()->route('login')->with('success', 'Berhasil registrasi! Silahkan Login');
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -43,14 +45,11 @@ class AuthUserService
                 'email' => $request->email ?? 'unkwon'
             ]);
 
-            return [
-                'success' => false,
-                'message' => 'Registrasi gagal, silahkan coba lagi.'
-            ];
+            return redirect()->back();
         }
     }
 
-    public function handleLogin(LoginRequest $request): array
+    public function handleLogin(LoginRequest $request)
     {
         try {
             $validated = $request->validated();
@@ -64,37 +63,32 @@ class AuthUserService
             if (!Auth::attempt($credentials, $remember)) {
                 Log::warning('Failed login attempt', [
                     'email' => $credentials['email'],
-                    'ip' => request()->ip()
                 ]);
 
-                return [
-                    'success' => false,
-                    'message' => 'Email atau password salah.'
-                ];
+                return redirect()->back()->withErrors(['email' => 'Email atau password kamu salah'])->onlyInput('email');
             }
 
             $user = Auth::user();
+
+            $this->cartService->mergeGuestCartToUser();
 
             request()->session()->regenerate();
 
             Log::info('User logged in successfully', [
                 'user_id' => $user->id,
                 'email' => $user->email,
-                'ip' => request()->ip()
             ]);
 
-            return [
-                'success' => true,
-                'user' => $user,
-                'message' => 'Login berhasil'
-            ];
+            if (Session::has('checkout_redirect')) {
+                Session::forget('checkout_redirect');
+                return redirect()->route('checkout')->with('Success', 'Login berhasil! Silahkan lanjut checkout');
+            }
+
+            return redirect()->intended('/')->with('succcess', 'Login Berhasil');
         } catch (\Exception $e) {
             Log::error('Login process failed: ' . $e->getMessage());
 
-            return [
-                'success' => false,
-                'message' => 'Terjadi kesalahan, silahkan coba lagi.'
-            ];
+            return redirect()->back();
         }
     }
 
@@ -109,7 +103,7 @@ class AuthUserService
         return $data;
     }
 
-    public function handleLogout(): array
+    public function handleLogout()
     {
         try {
             $user = Auth::user();
@@ -126,17 +120,11 @@ class AuthUserService
                 ]);
             }
 
-            return [
-                'success' => true,
-                'message' => 'Logout berhasil!'
-            ];
+            return redirect()->route('home')->with('Success', 'Berhasil Logout');
         } catch (\Exception $e) {
             Log::error('Logout failed: ' . $e->getMessage());
 
-            return [
-                'success' => false,
-                'message' => 'Logout gagal.'
-            ];
+            return redirect()->back();
         }
     }
 

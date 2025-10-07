@@ -103,7 +103,7 @@ class TransactionService
                 }
             }
 
-            $this->transactionRepo->updateTransactionStatus($transactionCode, OrderStatusEnum::CANCELED->value);
+            $this->transactionRepo->updateTransactionStatus($transactionCode, OrderStatusEnum::CANCELLED->value);
         });
     }
 

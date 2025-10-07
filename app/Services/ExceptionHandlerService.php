@@ -1,0 +1,27 @@
+<?php
+
+namespace App\Services;
+
+use Illuminate\Http\RedirectResponse;
+
+class ExceptionHandlerService
+{
+    public function __construct(
+        private readonly ResponseService $responseService
+    ) {}
+
+    public function handleWithRedirect(\Exception $e, string $defaultRoute = null): RedirectResponse
+    {
+        return $this->responseService->errorWithRedirect($e->getMessage());
+    }
+
+    public function handleWithInput(\Exception $e): RedirectResponse
+    {
+        return $this->responseService->errorWithRedirect($e->getMessage());
+    }
+
+    public function handleCartAction(\Exception $e): RedirectResponse
+    {
+        return redirect()->route('keranjang')->with('error', $e->getMessage());
+    }
+}

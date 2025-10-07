@@ -52,7 +52,7 @@ class ViewService
     {
         $this->cartService->mergeGuestCartToUser();
         $cartItems = $this->cartService->getCartItems(1);
-        
+
 
         return view('user.page.checkout', [
             'title' => 'Checkout',
@@ -72,6 +72,24 @@ class ViewService
         ]);
     }
 
+    public function loginPage()
+    {
+        return view('user.page.login', [
+            'title' => 'Login',
+        ]);
+    }
 
+    public function registerPage()
+    {
+        return view('user.page.register',[
+            'title' => 'Register',
+        ]);
+    }
 
+    public function forgotPage()
+    {
+        return view('user.page.forgot',[
+            'title' => 'Forgot Password'
+        ]);
+    }
 }

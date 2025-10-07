@@ -10,7 +10,7 @@ use App\Services\AdminAuthService;
 use App\Services\AdminViewService;
 use Illuminate\Http\Request;
 
-class AuthController extends Controller
+class AdminAuthController extends Controller
 {
     public function __construct(
         private readonly AdminAuthService $adminAuthService,

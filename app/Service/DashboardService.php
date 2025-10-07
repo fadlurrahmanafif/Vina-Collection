@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Services;
+namespace App\Service;
 
-class AdminAuthService
+class DashboardService
 {
     /**
      * Create a new class instance.

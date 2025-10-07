@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
 use App\Actions\AdminLoginAction;
 use App\Actions\DeleteDataOrderAction;
@@ -9,16 +9,12 @@ use App\Actions\StoreDataProductAction;
 use App\Actions\UpdateDataOrderStatusAction;
 use App\Actions\UpdateDataProductAction;
 use App\Handlers\ExceptionHandler;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\ProductRequest;
 use App\Http\Requests\ProdukRequest;
-use App\Models\DetailTransaksi;
-use App\Models\Product;
-use App\Models\transaksi;
-use App\Models\User;
-use App\Services\AdminAuthService;
+use App\Http\Requests\StatusPesananRequest;
 use App\Services\AdminViewService;
-use App\Services\DashboardService;
 use App\Services\DataProductService;
 use App\Services\ResponseService;
 use Illuminate\Http\Request;
@@ -41,172 +37,140 @@ class AdminController extends Controller
         private readonly DeleteDataProductAction $deleteDataProductAction,
         private readonly DataProductService $productService,
         private readonly AdminViewService $adminviewService,
-        )
-    {
-    }
+    ) {}
+
+
+    // ==================== DASHBOARD ====================
     public function dasboard()
     {
         return $this->adminviewService->dashboard();
     }
 
+    // ==================== PRODUCTS ====================
     public function product()
     {
-         return $this->adminviewService->adminProduct();
+        return $this->adminviewService->adminProduct();
     }
 
-    // pesanan
-    public function dataPesanan()
-    {
-        return $this->adminviewService->adminDataOrder();
-    }
-
-        public function updateStatusPesanan(Request $request, $id)
-        {
-            try {
-                $transaksi = transaksi::findOrFail($id);
-
-                $request->validate([
-                    'status_pesanan' => 'required|in:pending,dikonfirmasi,diproses,dikirim,selesai,dibatalkan'
-                ]);
-
-                // PERBAIKAN: Jika admin mengubah status ke 'dibatalkan', kembalikan stok
-                if ($request->status_pesanan === 'dibatalkan' && $transaksi->status_pesanan !== 'dibatalkan') {
-                    DB::beginTransaction();
-
-                    // Kembalikan stok produk jika belum dikembalikan
-                    $details = DetailTransaksi::where('id_transaksi_code', $transaksi->code_transaksi)->get();
-                    foreach ($details as $detail) {
-                        $product = Product::find($detail->id_barang);
-                        if ($product) {
-                            $product->stok += $detail->stok;
-                            $product->stok_out -= $detail->stok;
-                            $product->save();
-                        }
-                    }
-
-                    // Update status transaksi (data detail tetap ada, tidak dihapus)
-                    $transaksi->update([
-                        'status_pesanan' => $request->status_pesanan
-                    ]);
-
-                    DB::commit();
-                } else {
-                    // Status lainnya, update normal
-                    $transaksi->update([
-                        'status_pesanan' => $request->status_pesanan
-                    ]);
-                }
-
-                Alert::success('Berhasil!', 'Status pesanan berhasil diupdate');
-                return redirect()->back();
-            } catch (\Exception $e) {
-                if (isset($request->status_pesanan) && $request->status_pesanan === 'dibatalkan') {
-                    DB::rollback();
-                }
-                Alert::error('Error', 'Gagal mengupdate status: ' . $e->getMessage());
-                return redirect()->back();
-            }
-        }
-
-        public function destroyPesanan(Request $request, $id)
-        {
-            try {
-                DB::beginTransaction();
-
-                $data = transaksi::findOrFail($id);
-
-                DetailTransaksi::where('id_transaksi_code', $data->code_transaksi)->delete();
-
-                $data->delete();
-
-
-                DB::commit();
-
-                Alert::toast('Data berhasil dihapus', 'success');
-                return redirect()->route('data.pesanan');
-            } catch (\Exception $e) {
-                DB::rollBack();
-                Alert::error('Error', 'Gagal menghapus data: ' . $e->getMessage());
-                return redirect()->back();
-            }
-        }
-
-    // user data
-    public function userData()
-    {
-        $data = User::paginate(3);
-        return view('admin.page.userdata', [
-            'name' => 'User Data',
-            'title' => 'Admin User Data',
-            'data' => $data,
-        ]);
-    }
-
-    // CRUD ADD PRODUK
     public function addModal()
     {
-        return view('admin.modal.addModal', [
-            'title' => 'Tambah Data Product',
-        ]);
+        return $this->adminviewService->addProductModal();
     }
+
+    public function editModal($id)
+    {
+        return $this->adminviewService->editProductModal($id);
+    }
+
 
     public function store(ProductRequest $request)
     {
         // Jika sampai di sini berarti validation passed
         try {
-            
+            DB::beginTransaction();
+
+            $this->storeDataProductAction->execute($request);
+
+            DB::commit();
+
+            return $this->responseService->successWithRedirect(
+                'Produk berhasil ditambahkan',
+                'product'
+            );
         } catch (\Exception $e) {
-            return redirect()
-                ->route('product')
-                ->withInput()
-                ->with('error', 'Gagal menyimpan: ' . $e->getMessage())
-                ->with('showModal', true);
+            DB::rollBack();
+            return $this->exceptionHandler->handleWithRedirect($e);
         }
     }
 
-    public function editModal($id)
-    {
-        $data = Product::findOrFail($id);
 
-        return view('admin.modal.editModal', [
-            'title' => 'Edit Data Product',
-            'data' => $data,
-        ]);
-    }
 
     public function update(Request $request, $id)
     {
-        $data = Product::findOrFail($id);
+        try {
+            DB::beginTransaction();
 
-        if ($request->file('foto')) {
-            $photo = $request->file('foto');
-            $filename = date('Ymd') . '_' . $photo->getClientOriginalName();
-            $photo->move(public_path('storage/produk'), $filename);
-            $data->foto = $filename;
-        } else {
-            $filename = $request->foto;
+            $this->updateDataProductAction->execute($id, $request);
+
+            DB::commit();
+
+            return $this->responseService->successWithRedirect(
+                'Produk berhasil diupdate',
+                'product'
+            );
+        } catch(\Exception $e) {
+            DB::rollBack();
+            return $this->exceptionHandler->handleWithRedirect($e);
         }
-
-        $field = [
-            'nama_produk' => $request->nama_produk,
-            'tipe' => $request->tipe,
-            'kategori' => $request->kategori,
-            'harga' => $request->harga,
-            'stok' => $request->stok,
-            'foto' => $filename,
-        ];
-
-        $data::where('id', $id)->update($field);
-        return redirect()
-            ->route('product');
     }
 
     public function destroy(Request $request, $id)
     {
-        $data = Product::findOrFail($id);
-        $data->delete();
-        Alert::toast('Data berhasil dihapus', 'success');
-        return redirect()->route('product');
+        try {
+            DB::beginTransaction();
+
+            $this->deleteDataOrderAction->execute($id);
+
+            DB::commit();
+
+            return $this->responseService->successWithRedirect(
+                'Data berhasil dihapus',
+                'product'
+            );
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->exceptionHandler->handleWithRedirect($e);
+        }
     }
 
+    // ==================== ORDERS ====================
+    public function dataPesanan()
+    {
+        return $this->adminviewService->adminDataOrder();
+    }
+
+    public function updateStatusPesanan(StatusPesananRequest $request, int $id)
+    {
+        try {
+            DB::beginTransaction();
+            $request->validated();
+
+            $this->updateDataOrderStatusAction->execute($id, $request);
+
+            DB::commit();
+
+            return $this->responseService->successWithRedirect(
+                'Status pesanan berhasil di update'
+            );
+        } catch (\Exception $e) {
+                DB::rollback();
+
+                return $this->exceptionHandler->handleWithRedirect($e);
+        }
+    }
+
+    public function destroyPesanan(Request $request, $id)
+    {
+        try {
+            DB::beginTransaction();
+
+            $this->deleteDataOrderAction->execute($id);
+
+            DB::commit();
+
+            return $this->responseService->toastSuccess(
+                'Data berhasil dihapus',
+                'data.pesanan'
+            );
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->exceptionHandler->handleWithRedirect($e);
+        }
+    }
+
+    // ==================== USERS ====================
+    public function userData()
+    {
+        return $this->adminviewService->adminDataUsers();
+    }
 }

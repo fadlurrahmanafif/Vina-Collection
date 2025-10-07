@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Services;
+namespace App\Requests;
 
-class AdminAuthService
+class ProdukRequest
 {
     /**
      * Create a new class instance.

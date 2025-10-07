@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\User;
 
 use App\Actions\ProcessCheckoutAction;
 use App\Actions\ProcessPaymentAction;
 use App\Handlers\ExceptionHandler;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\prosesPembayaranRequest;
 use App\Services\{
     ViewService,
@@ -15,7 +16,6 @@ use App\Services\{
 };
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use RealRashid\SweetAlert\Facades\Alert;
 
 class UserController extends Controller
 {
@@ -48,14 +48,19 @@ class UserController extends Controller
     public function addCart(Request $request)
     {
         try {
+            DB::beginTransaction();
+
             $this->cartService->addToCart(
                 $request->integer('idProduct')
             );
+
+            DB::commit();
             return $this->responseService->toastSuccess(
                 'Produk berhasil di tambahkan ke keranjang',
                 'home'
             );
         } catch (\Exception $e) {
+            DB::rollBack();
             return $this->exceptionHandler->handleCartAction($e);
         }
     }
@@ -63,12 +68,17 @@ class UserController extends Controller
     public function destroyCart($id)
     {
         try {
+            DB::beginTransaction();
+
             $this->cartService->removeFromCart($id);
+
+            DB::commit();
             return $this->responseService->toastSuccess(
                 'Barang/item berhasil di hapus',
                 'keranjang'
             );
         } catch (\Exception $e) {
+            DB::rollBack();
             return $this->exceptionHandler->handleCartAction($e);
         }
     }
@@ -88,14 +98,18 @@ class UserController extends Controller
     public function konfirmasiPesanan(Request $request)
     {
         try {
+            DB::beginTransaction();
             $this->transactionService->confirmOrder(
                 $request->string('code_transaksi')->toString()
             );
+
+            DB::commit();
             return $this->responseService->successWithRedirect(
                 'Pesanan telah di terima oleh anda',
                 'status.pesanan'
             );
         } catch (\Exception $e) {
+            DB::rollBack();
             return $this->exceptionHandler->handleWithRedirect($e);
         }
     }

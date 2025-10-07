@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Services;
+namespace App;
 
-class AdminAuthService
+class HelpersResponHelper
 {
     /**
      * Create a new class instance.
